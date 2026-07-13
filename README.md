@@ -1,5 +1,7 @@
 # FS25 Workflow Manager — Web Editor
 
+**Live**: https://cschoch.github.io/FS25_WorkflowManagerWebeditor/
+
 A standalone static web app to create and edit Workflow Manager workflows in the browser —
 no game running, no build step, no dependencies. Deployable as a GitHub Page.
 
@@ -38,6 +40,5 @@ no game running, no build step, no dependencies. Deployable as a GitHub Page.
 
 ## GitHub Pages deployment
 
-`.github/workflows/deploy-webeditor.yml` publishes this folder via GitHub Pages on every
-push to `main` that touches `webeditor/`. One-time setup: repository **Settings → Pages →
-Source: GitHub Actions**.
+`.github/workflows/deploy-webeditor.yml` publishes this repo via GitHub Pages on every
+push to `master`. One-time setup: repository **Settings → Pages → Source: GitHub Actions**.

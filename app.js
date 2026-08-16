@@ -24,6 +24,8 @@ const CP_ACTIONS = ["fieldwork", "bale_collect"];
 // which AD resolves automatically) — mirrors WorkflowManager:isTargetlessStepType in-game.
 const isMarkerType = (t) => t === STEP_WAIT_FOR_LEADER || t === STEP_UNLOCK_FOLLOWER
   || t === STEP_PARK || t === STEP_REFUEL || t === STEP_REPAIR;
+// Leader/follower sync markers only — mirrors WorkflowManager:isMarkerStepType in-game.
+const isSyncMarkerType = (t) => t === STEP_WAIT_FOR_LEADER || t === STEP_UNLOCK_FOLLOWER;
 const actionNeedsUnloadTarget = (type, action) =>
   type === STEP_AUTODRIVE && (action === "unload" || action === "pickup_deliver" || action === "load");
 const actionNeedsFillType = (type, action) =>
@@ -57,7 +59,7 @@ const I18N = {
     dialogAddSupport: "Add Support Step", dialogEditSupport: "Edit Support Step",
     markerWaitInfo: "Sync marker: the vehicle waits here until its leader passes the matching “Unlock Follower” marker. No target or action needed.",
     markerUnlockInfo: "Sync marker: passing this step releases followers waiting at their matching “Wait for Leader” marker. No target or action needed.",
-    parkInfo: "Drives to the vehicle's AutoDrive park position (checking its rear-attached implement first, then the vehicle itself). No target or action needed — configure the park position in AutoDrive.",
+    parkInfo: "Drives to the vehicle's AutoDrive park position (attached implements are checked first — the one furthest behind the vehicle wins — then the vehicle itself). No target or action needed — configure the park position in AutoDrive.",
     refuelInfo: "Drives to the nearest AutoDrive-reachable fuel station matching the vehicle's fuel type. No target or action needed. If the vehicle is already fueled or no station is reachable, the step completes immediately instead of failing.",
     repairInfo: "Drives to the nearest AutoDrive-reachable workshop and repairs the vehicle. No target or action needed. Fails if no repair station is reachable.",
     actionNames: {
@@ -117,7 +119,7 @@ const I18N = {
     dialogAddSupport: "Unterstützungsschritt hinzufügen", dialogEditSupport: "Unterstützungsschritt bearbeiten",
     markerWaitInfo: "Sync-Marker: Das Fahrzeug wartet hier, bis sein Anführer den passenden „Folger freigeben“-Marker passiert. Kein Ziel/keine Aktion nötig.",
     markerUnlockInfo: "Sync-Marker: Beim Passieren dieses Schritts werden Folger freigegeben, die an ihrem „Auf Anführer warten“-Marker warten. Kein Ziel/keine Aktion nötig.",
-    parkInfo: "Fährt zur in AutoDrive konfigurierten Parkposition des Fahrzeugs (zuerst wird das rückseitig angehängte Gerät geprüft, dann das Fahrzeug selbst). Kein Ziel/keine Aktion nötig — die Parkposition wird in AutoDrive konfiguriert.",
+    parkInfo: "Fährt zur in AutoDrive konfigurierten Parkposition des Fahrzeugs (zuerst werden die angehängten Geräte geprüft — das am weitesten hinten liegende gewinnt — dann das Fahrzeug selbst). Kein Ziel/keine Aktion nötig — die Parkposition wird in AutoDrive konfiguriert.",
     refuelInfo: "Fährt zur nächsten über AutoDrive erreichbaren Tankstelle für den benötigten Kraftstofftyp. Kein Ziel/keine Aktion nötig. Ist das Fahrzeug bereits betankt oder keine Tankstelle erreichbar, wird der Schritt sofort abgeschlossen statt fehlzuschlagen.",
     repairInfo: "Fährt zur nächsten über AutoDrive erreichbaren Werkstatt und repariert das Fahrzeug. Kein Ziel/keine Aktion nötig. Schlägt fehl, wenn keine Werkstatt erreichbar ist.",
     actionNames: {
@@ -349,10 +351,12 @@ function parseStepEl(el, withSupport) {
     action: attr(el, "action", "default"),
     unloadTarget: attr(el, "unloadTarget") || null,
     fillTypes: parseFillTypesAttr(attr(el, "fillTypes")) || parseFillTypesAttr(attr(el, "fillType")),
-    // Legacy fields read for migration only
+    // Legacy fields read for migration only.
+    // No default for the sync flags: absent vs false must stay distinguishable — the flag
+    // era only wrote them when false, pre-sync-era files never wrote them at all.
     syncGroup: el.hasAttribute("syncGroup") ? parseInt(el.getAttribute("syncGroup"), 10) : null,
-    isSyncTarget: boolAttr(el, "isSyncTarget", true),
-    isSyncSource: boolAttr(el, "isSyncSource", true),
+    isSyncTarget: boolAttr(el, "isSyncTarget", null),
+    isSyncSource: boolAttr(el, "isSyncSource", null),
   };
   if (withSupport) {
     step.support = [...el.children]
@@ -415,6 +419,21 @@ function migrateSyncFlagsToMarkers(workflows, formatVersion) {
     }
     return { workflows, migrated: false };
   }
+  // Distinguish two generations of version-less (v1) files:
+  //  * flag-era files wrote isSyncTarget/isSyncSource, but ONLY when false — within such
+  //    a file, an absent flag means true.
+  //  * pre-sync-era files never wrote the flags at all — sync did not exist, so no markers
+  //    must be inserted. Without this check every legacy workflow gets two markers before
+  //    every step (a 6-step workflow balloons to 18).
+  const hasAnySyncFlag = workflows.some((wf) =>
+    wf.steps.some((step) => step.isSyncTarget != null || step.isSyncSource != null));
+  if (!hasAnySyncFlag) {
+    for (const wf of workflows) for (const step of wf.steps) {
+      delete step.isSyncTarget; delete step.isSyncSource;
+    }
+    return { workflows, migrated: false };
+  }
+
   let migrated = false;
   for (const wf of workflows) {
     const newSteps = [];
@@ -980,11 +999,23 @@ function openStepModal(wf, { stepIndex = null, supportIndex = null, isNewSupport
   if (!isMarkerType(modal.type)) $("stepTarget").focus();
 }
 
+/** Selectable step types for the currently open dialog (mirrors WMStepDialog:getStepTypes).
+ *  Sync markers are omitted for support sub-steps: leader/follower pairing is built from
+ *  workflow.steps only, so a marker nested under a main step has nothing to pair with and
+ *  would abort the workflow in-game. Exception: keep them listed when the sub-step being
+ *  edited already is a marker (data saved before the restriction existed), so the control
+ *  reflects reality and can convert it. */
+function modalStepTypes() {
+  const isSupport = modal.isNewSupport || modal.supportIndex != null;
+  if (!isSupport || isSyncMarkerType(modal.type)) return STEP_TYPES;
+  return STEP_TYPES.filter((t) => !isSyncMarkerType(t));
+}
+
 function renderStepModal() {
   // Type segmented control
   const seg = $("stepTypeSeg");
   seg.replaceChildren();
-  for (const type of STEP_TYPES) {
+  for (const type of modalStepTypes()) {
     const cls = type === STEP_AUTODRIVE ? "t-ad" : type === STEP_COURSEPLAY ? "t-cp" : "t-marker";
     const b = el("button", { type: "button", class: `${cls}${modal.type === type ? " active" : ""}` }, stepTypeLabel(type));
     b.addEventListener("click", () => {

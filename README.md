@@ -17,7 +17,8 @@ no game running, no build step, no dependencies. Deployable as a GitHub Page.
 - **Fill types**: multi-select with search (full FS25 base list built in, custom mod
   fill type IDs can be typed in)
 - **Support sub-steps**: nest support-vehicle steps under any main step, reorder them,
-  edit and duplicate them
+  edit and duplicate them (sync markers are not offered here — like in-game, leader/follower
+  pairing is built from main steps only)
 - **AD/CP settings** per workflow: Unload Fill Level (%), Pipe Offset (m), Pre-Call Level (%)
 - **Reordering**: move buttons + drag & drop
 - **Import** `workflowManager.xml` (file picker or drop anywhere on the page) — old save

@@ -1,5 +1,7 @@
 /* FS25 Workflow Manager — Web Editor
-   Theme: CSS variables, light + dark via [data-theme] with prefers-color-scheme fallback. */
+   Theme: CSS variables, light + dark selected by [data-theme] on <html>. That attribute is
+   stamped by the inline script in index.html <head> (system preference, or the saved override)
+   before first paint, so there is no media query here and no light flash on a dark system. */
 
 :root {
   --accent: #3d9142;
@@ -115,7 +117,10 @@ input, select { font: inherit; color: inherit; }
 .btn.block { width: 100%; }
 .btn.chip-btn.marker { background: var(--marker-soft); color: var(--marker); border-color: transparent; }
 .btn.chip-btn.marker:hover { border-color: var(--marker); }
-.btn.chip-btn.marker::before { content: "+"; font-weight: 700; }
+/* Park/Refuel/Repair: targetless like the sync markers, but real AutoDrive jobs */
+.btn.chip-btn.auto { background: transparent; color: var(--ad); border-color: var(--ad-soft); }
+.btn.chip-btn.auto:hover { border-color: var(--ad); }
+.btn.chip-btn::before { content: "+"; font-weight: 700; }
 
 .icon-btn {
   display: inline-flex; align-items: center; justify-content: center;
@@ -156,7 +161,10 @@ input, select { font: inherit; color: inherit; }
 }
 .wf-item:hover { background: var(--bg-hover); }
 .wf-item.active { background: var(--accent-soft); border-color: var(--accent); }
-.wf-item-main { flex: 1; min-width: 0; }
+.wf-item-main {
+  flex: 1; min-width: 0; text-align: left; cursor: pointer;
+  border: none; background: none; padding: 0; font: inherit; color: inherit;
+}
 .wf-item-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .wf-item-sub { font-size: 11.5px; color: var(--text-dim); }
 .wf-item-actions { display: none; gap: 2px; }
@@ -264,6 +272,9 @@ input, select { font: inherit; color: inherit; }
 .type-badge.ad { background: var(--ad-soft); color: var(--ad); }
 .type-badge.cp { background: var(--cp-soft); color: var(--cp); }
 .type-badge.marker { background: var(--marker-soft); color: var(--marker); }
+/* AD-driven but targetless (Park/Refuel/Repair): AutoDrive's colour, outlined instead of
+   filled so it stays distinguishable from a real AutoDrive step at a glance. */
+.type-badge.auto { background: transparent; color: var(--ad); box-shadow: inset 0 0 0 1px var(--ad); }
 .step-action { font-weight: 600; font-size: 13px; }
 .step-target-line { color: var(--text-dim); font-size: 13px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; }
 .step-target-line .arrow { color: var(--text-faint); }
@@ -288,7 +299,6 @@ input, select { font: inherit; color: inherit; }
 .step-actions .mini.support-add:hover { background: var(--accent-soft); }
 
 /* Support sub-steps */
-.support-block { display: flex; flex-direction: column; gap: 6px; }
 .support-row { margin-left: 42px; position: relative; background: var(--bg-inset); }
 .support-row::before {
   content: ""; position: absolute; left: -22px; top: -12px; bottom: 50%;
@@ -336,11 +346,14 @@ input, select { font: inherit; color: inherit; }
 .seg button.active.t-ad { background: var(--ad-soft); border-color: var(--ad); color: var(--ad); }
 .seg button.active.t-cp { background: var(--cp-soft); border-color: var(--cp); color: var(--cp); }
 .seg button.active.t-marker { background: var(--marker-soft); border-color: var(--marker); color: var(--marker); }
+.seg button.active.t-auto { background: transparent; border-color: var(--ad); color: var(--ad); }
 
 .marker-info {
   background: var(--marker-soft); color: var(--marker);
   border-radius: var(--radius-sm); padding: 11px 13px; font-size: 13px; margin: 0 0 14px;
 }
+/* Park/Refuel/Repair share this box but are AutoDrive jobs, not sync markers */
+.marker-info.auto { background: var(--ad-soft); color: var(--ad); }
 
 /* Combobox */
 .combo { position: relative; }

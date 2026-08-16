@@ -7,6 +7,15 @@
 <meta name="description" content="Create and edit FS25 Workflow Manager workflows in your browser. Import and export workflowManager.xml.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%233d9142'/%3E%3Cpath d='M8 10h16M8 16h16M8 22h10' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="style.css">
+<script>
+/* Stamp the theme before first paint — app.js only runs on DOMContentLoaded, which is late
+   enough for a dark-mode user to get a white flash. Key must match LS_KEY in app.js. */
+try {
+  var saved = JSON.parse(localStorage.getItem("fs25wm.webeditor.v1") || "{}").theme;
+  document.documentElement.dataset.theme =
+    saved || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+} catch (e) { /* private mode / blocked storage — app.js sets it again on load */ }
+</script>
 </head>
 <body>
 
@@ -68,7 +77,7 @@
         <path d="M8 10h16M8 16h16M8 22h10" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
       </svg>
       <h2 data-i18n="emptyTitle">Plan your farm's day — before you even start the game</h2>
-      <p data-i18n="emptyText">Create AutoDrive &amp; Courseplay workflows here, then export <code>workflowManager.xml</code> into your savegame folder.</p>
+      <p data-i18n-html="emptyText">Create AutoDrive &amp; Courseplay workflows here, then export <code>workflowManager.xml</code> into your savegame folder.</p>
       <div class="empty-actions">
         <button class="btn primary" id="btnEmptyNew" data-i18n="newWorkflow">New workflow</button>
         <button class="btn ghost" id="btnEmptyImport" data-i18n="importBtn">Import XML</button>
@@ -129,9 +138,9 @@
             </button>
             <button class="btn chip-btn marker sm" id="btnQuickWait" title="" data-i18n="typeWait">Wait for Leader</button>
             <button class="btn chip-btn marker sm" id="btnQuickUnlock" title="" data-i18n="typeUnlock">Unlock Follower</button>
-            <button class="btn chip-btn marker sm" id="btnQuickPark" title="" data-i18n="typePark">Park</button>
-            <button class="btn chip-btn marker sm" id="btnQuickRefuel" title="" data-i18n="typeRefuel">Refuel</button>
-            <button class="btn chip-btn marker sm" id="btnQuickRepair" title="" data-i18n="typeRepair">Repair</button>
+            <button class="btn chip-btn auto sm" id="btnQuickPark" title="" data-i18n="typePark">Park</button>
+            <button class="btn chip-btn auto sm" id="btnQuickRefuel" title="" data-i18n="typeRefuel">Refuel</button>
+            <button class="btn chip-btn auto sm" id="btnQuickRepair" title="" data-i18n="typeRepair">Repair</button>
           </div>
         </div>
         <div class="step-list" id="stepList"></div>
@@ -221,7 +230,8 @@
             <input type="text" id="newCpTarget" data-i18n-ph="addCoursePh" placeholder="Add course…">
             <button class="btn primary sm" id="btnAddCpTarget" data-i18n="add">Add</button>
           </div>
-          <button class="btn ghost sm block" id="btnImportCpCourses" data-i18n="importCpCourses">Import course files (.xml)</button>
+          <button class="btn ghost sm block" id="btnImportCpCourses" data-i18n="importCpCourses">Import course folder</button>
+          <p class="hint" data-i18n="importCpHint">Pick your Courseplay “Courses” folder (or the map/Singleplayer folder inside it) — the folder structure is part of the course name.</p>
           <ul class="target-items" id="cpTargetItems"></ul>
         </div>
       </div>
@@ -240,7 +250,8 @@
     </div>
     <footer class="modal-foot">
       <button type="button" class="btn ghost" id="confirmCancel" data-i18n="cancel">Cancel</button>
-      <button type="button" class="btn danger" id="confirmOk" data-i18n="delete">Delete</button>
+      <!-- label is set per call by askConfirm() — not always a deletion -->
+      <button type="button" class="btn danger" id="confirmOk">Delete</button>
     </footer>
   </div>
 </dialog>
@@ -250,7 +261,8 @@
 
 <input type="file" id="fileImport" accept=".xml,text/xml" hidden>
 <input type="file" id="fileAdConfig" accept=".xml,text/xml" hidden>
-<input type="file" id="fileCpCourses" accept=".xml,text/xml" multiple hidden>
+<!-- directory pick: only the folder structure gives a course its root-relative name -->
+<input type="file" id="fileCpCourses" webkitdirectory multiple hidden>
 
 <script src="app.js"></script>
 </body>

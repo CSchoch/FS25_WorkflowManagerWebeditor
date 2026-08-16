@@ -27,7 +27,9 @@ no game running, no build step, no dependencies. Deployable as a GitHub Page.
 - **Export** a game-ready `workflowManager.xml` (formatVersion 2); HUD position from an
   imported file is preserved
 - **Target suggestions**: maintain AutoDrive destination / Courseplay course lists, import
-  marker names straight from an `AutoDrive_config.xml`, or course names from CP course files
+  marker names straight from an `AutoDrive_config.xml`, or course names by picking your
+  Courseplay `Courses` folder — names are kept root-relative (`Singleplayer/F34/Kalken`),
+  which is what the game matches on; a bare course name can resolve to another field's course
 - **Autosave** to browser localStorage, **light/dark mode**, **English/German** UI
 
 ## Usage

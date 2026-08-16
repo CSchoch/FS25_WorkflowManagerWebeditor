@@ -41,10 +41,10 @@ const I18N = {
     targetsBtn: "Targets", importBtn: "Import XML", exportBtn: "Export XML",
     searchPlaceholder: "Search workflows…", newWorkflow: "New workflow",
     emptyTitle: "Plan your farm's day — before you even start the game",
-    emptyText: "Create AutoDrive & Courseplay workflows here, then export workflowManager.xml into your savegame folder.",
+    emptyText: "Create AutoDrive &amp; Courseplay workflows here, then export <code>workflowManager.xml</code> into your savegame folder.",
     emptyHint: "Tip: you can also drop a workflowManager.xml file anywhere on this page.",
     namePlaceholder: "Workflow name", duplicate: "Duplicate", delete: "Delete", cancel: "Cancel",
-    save: "Save", add: "Add", done: "Done",
+    save: "Save", add: "Add", done: "Done", replace: "Replace",
     adSettingsTitle: "AD / CP Settings",
     adSettingsHint: "Per-workflow AutoDrive overrides. Leave a field empty to use AutoDrive's own setting.",
     unloadFill: "Unload Fill Level", pipeOffset: "Pipe Offset", preCall: "Pre-Call Level",
@@ -70,7 +70,8 @@ const I18N = {
     targetsHint: "The game reads AutoDrive destinations and Courseplay courses live — the browser can't. Maintain the lists here so step dialogs offer suggestions. Names found in imported workflows are added automatically.",
     adDests: "AutoDrive destinations", cpCourses: "Courseplay courses",
     addDestPh: "Add destination…", addCoursePh: "Add course…",
-    importAdConfig: "Import from AutoDrive_config.xml", importCpCourses: "Import course files (.xml)",
+    importAdConfig: "Import from AutoDrive_config.xml", importCpCourses: "Import course folder",
+    importCpHint: "Pick your Courseplay “Courses” folder (or the map/Singleplayer folder inside it) — the folder structure is part of the course name.",
     noEntries: "No entries yet",
     noMatches: "No matches — free text is kept as-is",
     targetHintAd: "AutoDrive map marker name. Manage suggestions under “Targets”.",
@@ -78,6 +79,7 @@ const I18N = {
     confirmDeleteWf: (n) => `Delete workflow “${n}”?`,
     confirmDeleteStep: "Delete this step (including its support steps)?",
     confirmDeleteSupport: "Delete this support step?",
+    confirmImportReplace: (n) => `Replace the ${n} workflow(s) in this editor with the imported file? Unexported changes are lost.`,
     copySuffix: "(Copy)", newWfName: "New Workflow", unnamed: "Unnamed",
     stepCount: (n) => `${n} step${n === 1 ? "" : "s"}`,
     wfCount: (n) => `${n} workflow${n === 1 ? "" : "s"}`,
@@ -92,6 +94,7 @@ const I18N = {
     toastMigrated: "Old save format detected — migrated automatically",
     settingsSet: (n) => `${n} override(s) set`, settingsNone: "using AutoDrive defaults",
     validationMissingTarget: "Target missing",
+    validationMarkerInSupport: "Sync markers can't run as support sub-steps — change the type or delete this row",
     metaId: "ID", metaSteps: "Steps", metaSupport: "Support steps",
     moveUp: "Move up", moveDown: "Move down", edit: "Edit", langName: "EN",
     dropHere: "Drop workflowManager.xml to import",
@@ -101,10 +104,10 @@ const I18N = {
     targetsBtn: "Ziele", importBtn: "XML importieren", exportBtn: "XML exportieren",
     searchPlaceholder: "Workflows suchen…", newWorkflow: "Neuer Workflow",
     emptyTitle: "Plane den Hoftag — noch bevor das Spiel startet",
-    emptyText: "Erstelle hier AutoDrive- & Courseplay-Workflows und exportiere workflowManager.xml in deinen Spielstand-Ordner.",
+    emptyText: "Erstelle hier AutoDrive- &amp; Courseplay-Workflows und exportiere <code>workflowManager.xml</code> in deinen Spielstand-Ordner.",
     emptyHint: "Tipp: Du kannst eine workflowManager.xml auch einfach auf diese Seite ziehen.",
     namePlaceholder: "Workflow-Name", duplicate: "Duplizieren", delete: "Löschen", cancel: "Abbrechen",
-    save: "Speichern", add: "Hinzufügen", done: "Fertig",
+    save: "Speichern", add: "Hinzufügen", done: "Fertig", replace: "Ersetzen",
     adSettingsTitle: "AD / CP Einstellungen",
     adSettingsHint: "AutoDrive-Überschreibungen pro Workflow. Leere Felder verwenden die AutoDrive-Einstellung.",
     unloadFill: "Abladen ab Level", pipeOffset: "Offset Rohr", preCall: "Vorab-Ruf Level",
@@ -130,7 +133,8 @@ const I18N = {
     targetsHint: "Das Spiel liest AutoDrive-Ziele und Courseplay-Kurse live — der Browser kann das nicht. Pflege die Listen hier, damit die Schritt-Dialoge Vorschläge anbieten. Namen aus importierten Workflows werden automatisch ergänzt.",
     adDests: "AutoDrive-Ziele", cpCourses: "Courseplay-Kurse",
     addDestPh: "Ziel hinzufügen…", addCoursePh: "Kurs hinzufügen…",
-    importAdConfig: "Aus AutoDrive_config.xml importieren", importCpCourses: "Kursdateien importieren (.xml)",
+    importAdConfig: "Aus AutoDrive_config.xml importieren", importCpCourses: "Kursordner importieren",
+    importCpHint: "Wähle deinen Courseplay-Ordner „Courses“ (oder den Map-/Singleplayer-Ordner darin) — die Ordnerstruktur ist Teil des Kursnamens.",
     noEntries: "Noch keine Einträge",
     noMatches: "Keine Treffer — Freitext wird übernommen",
     targetHintAd: "Name des AutoDrive-Kartenmarkers. Vorschläge unter „Ziele“ verwalten.",
@@ -138,6 +142,7 @@ const I18N = {
     confirmDeleteWf: (n) => `Workflow „${n}“ löschen?`,
     confirmDeleteStep: "Diesen Schritt (inkl. Unterstützungsschritte) löschen?",
     confirmDeleteSupport: "Diesen Unterstützungsschritt löschen?",
+    confirmImportReplace: (n) => `Die ${n} Workflow(s) im Editor durch die importierte Datei ersetzen? Nicht exportierte Änderungen gehen verloren.`,
     copySuffix: "(Kopie)", newWfName: "Neuer Workflow", unnamed: "Unbenannt",
     stepCount: (n) => `${n} Schritt${n === 1 ? "" : "e"}`,
     wfCount: (n) => `${n} Workflow${n === 1 ? "" : "s"}`,
@@ -152,6 +157,7 @@ const I18N = {
     toastMigrated: "Altes Speicherformat erkannt — automatisch migriert",
     settingsSet: (n) => `${n} Überschreibung(en) gesetzt`, settingsNone: "AutoDrive-Standard",
     validationMissingTarget: "Ziel fehlt",
+    validationMarkerInSupport: "Sync-Marker funktionieren nicht als Unterstützungsschritt — Typ ändern oder Zeile löschen",
     metaId: "ID", metaSteps: "Schritte", metaSupport: "Unterstützungsschritte",
     moveUp: "Nach oben", moveDown: "Nach unten", edit: "Bearbeiten", langName: "DE",
     dropHere: "workflowManager.xml zum Importieren ablegen",
@@ -233,6 +239,11 @@ function loadState() {
     if (Array.isArray(data.customFillTypes)) state.customFillTypes = data.customFillTypes;
     if (data.lang === "en" || data.lang === "de") state.lang = data.lang;
     if (data.theme === "light" || data.theme === "dark") state.theme = data.theme;
+    // A selectedId that no longer resolves leaves the editor showing the empty hero next to a
+    // full sidebar — fall back to the first workflow instead.
+    if (state.selectedId && !state.workflows.some((w) => w.id === state.selectedId)) {
+      state.selectedId = state.workflows[0]?.id || null;
+    }
   } catch (e) { /* corrupted storage — start fresh */ }
 }
 
@@ -247,13 +258,22 @@ function commit() { saveState(); render(); }
    Model helpers
    ============================================================ */
 
-function generateWorkflowId() {
-  // Same shape as WorkflowManager:generateWorkflowId() (workflow_<time>_<rand>)
-  return `workflow_${Date.now()}_${1000 + Math.floor(Math.random() * 9000)}`;
+/** Same shape as WorkflowManager:generateWorkflowId() (workflow_<time>_<rand>).
+ *  Pass a Set of ids already in use — the timestamp part is identical for ids minted in the
+ *  same millisecond (duplicate/import loops), leaving only 9000 random values to collide over. */
+function generateWorkflowId(taken) {
+  let id;
+  do { id = `workflow_${Date.now()}_${1000 + Math.floor(Math.random() * 9000)}`; }
+  while (taken && taken.has(id));
+  return id;
+}
+
+function usedWorkflowIds() {
+  return new Set(state.workflows.map((w) => w.id));
 }
 
 function newWorkflow(name) {
-  return { id: generateWorkflowId(), name: name || t("newWfName"), adSettings: {}, steps: [] };
+  return { id: generateWorkflowId(usedWorkflowIds()), name: name || t("newWfName"), adSettings: {}, steps: [] };
 }
 
 function selectedWorkflow() {
@@ -492,6 +512,14 @@ function importWorkflowsXml(xmlText) {
     }
   }
 
+  // Both this editor and the game key workflows by id (WorkflowManager:getWorkflowById), so a
+  // hand-edited or concatenated file with a repeated id would make one of them unreachable.
+  const seenIds = new Set();
+  for (const wf of workflows) {
+    if (!wf.id || seenIds.has(wf.id)) wf.id = generateWorkflowId(seenIds);
+    seenIds.add(wf.id);
+  }
+
   const hudEl = root.querySelector(":scope > settings > hud");
   const hud = hudEl ? { posX: floatAttr(hudEl, "posX"), posY: floatAttr(hudEl, "posY") } : null;
 
@@ -590,10 +618,26 @@ function importAdConfigXml(xmlText) {
   return names.size === 0 ? -1 : added;
 }
 
+/** Root-relative course name for a picked file ("Singleplayer/F34/Kalken").
+ *  Courseplay stores and resolves course names relative to its root directory view, and the
+ *  in-game lookup (CPIntegration:findCourseEntry) matches the folder part as a path SUFFIX.
+ *  A bare base name therefore matches every field folder holding a course of that name and
+ *  silently loads the wrong field's course — so the folders the file sits in are part of the
+ *  name, not decoration. Courseplay's root always contains a "Singleplayer" folder
+ *  (fixCourseStorageRoot hardcodes it, multiplayer included); keep the path from there on so
+ *  the result is identical no matter which level the user picked. */
+function courseNameFromFile(file) {
+  const rel = String(file.webkitRelativePath || file.name).replace(/\\/g, "/");
+  const parts = rel.replace(/\.xml$/i, "").split("/").filter(Boolean);
+  const rootIndex = parts.indexOf("Singleplayer");
+  return (rootIndex >= 0 ? parts.slice(rootIndex) : parts).join("/").trim();
+}
+
 function importCpCourseFiles(files) {
   let added = 0;
   for (const f of files) {
-    const name = f.name.replace(/\.xml$/i, "").trim();
+    if (!/\.xml$/i.test(f.name)) continue; // a folder pick hands us everything inside it
+    const name = courseNameFromFile(f);
     if (name && !state.targets.cp.includes(name)) { state.targets.cp.push(name); added++; }
   }
   state.targets.cp.sort((a, b) => a.localeCompare(b));
@@ -646,9 +690,11 @@ function toast(msg, isError = false) {
 }
 
 let confirmCallback = null;
-function askConfirm(text, onOk) {
+/** @param okKey i18n key for the confirming button — it is not always a deletion. */
+function askConfirm(text, onOk, okKey = "delete") {
   confirmCallback = onOk;
   $("confirmText").textContent = text;
+  $("confirmOk").textContent = t(okKey);
   $("confirmModal").showModal();
 }
 
@@ -660,6 +706,11 @@ function applyI18nStatic() {
   document.documentElement.lang = state.lang;
   for (const node of document.querySelectorAll("[data-i18n]")) {
     node.textContent = t(node.dataset.i18n);
+  }
+  // Same, for the handful of strings that carry inline markup (constants from I18N above —
+  // never user input). Plain [data-i18n] would flatten the <code> element on first render.
+  for (const node of document.querySelectorAll("[data-i18n-html]")) {
+    node.innerHTML = t(node.dataset.i18nHtml);
   }
   for (const node of document.querySelectorAll("[data-i18n-ph]")) {
     node.placeholder = t(node.dataset.i18nPh);
@@ -701,14 +752,17 @@ function renderSidebar() {
   for (const wf of filtered) {
     const supportCount = wf.steps.reduce((n, s) => n + (s.support ? s.support.length : 0), 0);
     const sub = t("stepCount", wf.steps.length) + (supportCount ? ` · ${t("supportCount", supportCount)}` : "");
-    const item = el("button", { class: `wf-item${wf.id === state.selectedId ? " active" : ""}` },
-      el("div", { class: "wf-item-main" },
-        el("div", { class: "wf-item-name" }, wf.name || t("unnamed")),
-        el("div", { class: "wf-item-sub" }, sub)),
+    // The row is a plain element wrapping one selectable button — nesting the duplicate/delete
+    // buttons inside a <button> row would be invalid HTML and unreachable for screen readers.
+    const select = el("button", { type: "button", class: "wf-item-main" },
+      el("div", { class: "wf-item-name" }, wf.name || t("unnamed")),
+      el("div", { class: "wf-item-sub" }, sub));
+    select.addEventListener("click", () => { state.selectedId = wf.id; commit(); });
+    const item = el("div", { class: `wf-item${wf.id === state.selectedId ? " active" : ""}` },
+      select,
       el("div", { class: "wf-item-actions" },
         miniBtn("copy", t("duplicate"), () => duplicateWorkflow(wf.id)),
         miniBtn("trash", t("delete"), () => requestDeleteWorkflow(wf.id), { class: "danger" })));
-    item.addEventListener("click", () => { state.selectedId = wf.id; commit(); });
     list.append(item);
   }
   $("wfCount").textContent = t("wfCount", state.workflows.length);
@@ -762,16 +816,22 @@ function renderSteps(wf) {
 function typeBadgeClass(type) {
   if (type === STEP_AUTODRIVE) return "ad";
   if (type === STEP_COURSEPLAY) return "cp";
-  return "marker";
+  // Park/Refuel/Repair are targetless but still real AutoDrive jobs — only the leader/follower
+  // sync markers are pass-throughs, so they don't share the marker colour.
+  return isSyncMarkerType(type) ? "marker" : "auto";
 }
 
 function stepRow(wf, step, stepIndex, supportIndex) {
   const isSupport = supportIndex != null;
   const marker = isMarkerType(step.type);
   const missingTarget = !marker && !(step.target || "").trim();
+  // Sync markers pair against workflow.steps only (WMExecutor:buildSyncMaps), so one nested
+  // under a main step can never be satisfied. New ones can't be created (see modalStepTypes),
+  // but imported files from before that restriction can still carry them.
+  const strandedMarker = isSupport && isSyncMarkerType(step.type);
 
   const row = el("div", {
-    class: `step-row${isSupport ? " support-row" : ""}${missingTarget ? " invalid" : ""}`,
+    class: `step-row${isSupport ? " support-row" : ""}${missingTarget || strandedMarker ? " invalid" : ""}`,
     draggable: "true",
   });
   row.dataset.step = stepIndex;
@@ -786,6 +846,11 @@ function stepRow(wf, step, stepIndex, supportIndex) {
     marker ? null : el("span", { class: "step-action" }, actionLabel(step.action)));
 
   const main = el("div", { class: "step-main" }, line1);
+
+  if (strandedMarker) {
+    main.append(el("div", { class: "step-target-line" },
+      el("span", { class: "tgt missing" }, `⚠ ${t("validationMarkerInSupport")}`)));
+  }
 
   if (!marker) {
     const tgtLine = el("div", { class: "step-target-line" });
@@ -932,7 +997,7 @@ function duplicateWorkflow(id) {
   const src = state.workflows.find((w) => w.id === id);
   if (!src) return;
   const copy = structuredClone(src);
-  copy.id = generateWorkflowId();
+  copy.id = generateWorkflowId(usedWorkflowIds());
   copy.name = `${src.name || t("unnamed")} ${t("copySuffix")}`;
   const idx = state.workflows.indexOf(src);
   state.workflows.splice(idx + 1, 0, copy);
@@ -1016,7 +1081,7 @@ function renderStepModal() {
   const seg = $("stepTypeSeg");
   seg.replaceChildren();
   for (const type of modalStepTypes()) {
-    const cls = type === STEP_AUTODRIVE ? "t-ad" : type === STEP_COURSEPLAY ? "t-cp" : "t-marker";
+    const cls = `t-${typeBadgeClass(type)}`;
     const b = el("button", { type: "button", class: `${cls}${modal.type === type ? " active" : ""}` }, stepTypeLabel(type));
     b.addEventListener("click", () => {
       if (modal.type === type) return;
@@ -1035,6 +1100,7 @@ function renderStepModal() {
   $("fieldAction").hidden = marker;
   $("fieldTarget").hidden = marker;
   if (marker) {
+    $("markerInfo").className = `marker-info${isSyncMarkerType(modal.type) ? "" : " auto"}`;
     $("markerInfo").textContent = t(stepInfoKey(modal.type));
     $("fieldUnloadTarget").hidden = true;
     $("fieldFillTypes").hidden = true;
@@ -1158,6 +1224,9 @@ function setupCombo(inputId, listId, kindFn) {
         close();
       }
     } else if (e.key === "Escape" && !list.hidden) {
+      // preventDefault, not just stopPropagation: closing a <dialog> on Escape is the key's
+      // DEFAULT ACTION, so without this the first Escape also discards the whole step dialog.
+      e.preventDefault();
       e.stopPropagation();
       close();
     }
@@ -1260,22 +1329,32 @@ function addTargetFromInput(kind, inputId) {
    File import / export
    ============================================================ */
 
+function applyImport(result) {
+  state.workflows = result.workflows;
+  if (result.hud && result.hud.posX != null) state.hud = result.hud;
+  for (const wf of state.workflows) {
+    for (const step of wf.steps) {
+      harvestStepTargets(step);
+      for (const sub of step.support || []) harvestStepTargets(sub);
+    }
+  }
+  state.selectedId = state.workflows[0]?.id || null;
+  if (result.migrated) toast(t("toastMigrated"));
+  toast(t("toastImported", state.workflows.length));
+  commit();
+}
+
 function handleWorkflowFile(file) {
   file.text().then((text) => {
     const result = importWorkflowsXml(text);
     if (!result) { toast(t("toastImportFailed"), true); return; }
-    state.workflows = result.workflows;
-    if (result.hud && result.hud.posX != null) state.hud = result.hud;
-    for (const wf of state.workflows) {
-      for (const step of wf.steps) {
-        harvestStepTargets(step);
-        for (const sub of step.support || []) harvestStepTargets(sub);
-      }
+    // An import replaces everything and autosaves over localStorage right after — there is no
+    // undo, and the page can be dropped on by accident, so confirm while something is at stake.
+    if (state.workflows.length > 0) {
+      askConfirm(t("confirmImportReplace", state.workflows.length), () => applyImport(result), "replace");
+    } else {
+      applyImport(result);
     }
-    state.selectedId = state.workflows[0]?.id || null;
-    if (result.migrated) toast(t("toastMigrated"));
-    toast(t("toastImported", state.workflows.length));
-    commit();
   });
 }
 

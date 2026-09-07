@@ -30,6 +30,9 @@ const actionNeedsUnloadTarget = (type, action) =>
   type === STEP_AUTODRIVE && (action === "unload" || action === "pickup_deliver" || action === "load");
 const actionNeedsFillType = (type, action) =>
   type === STEP_AUTODRIVE && (action === "pickup_deliver" || action === "load");
+// Seed type is a Courseplay field-work option only — mirrors WMStepDialog:actionNeedsSeedType.
+const actionNeedsSeedType = (type, action) =>
+  type === STEP_COURSEPLAY && action === "fieldwork";
 
 /* ============================================================
    i18n (labels match translations/translation_en.xml / _de.xml)
@@ -55,6 +58,7 @@ const I18N = {
     type: "Type", mode: "Mode", action: "Action", target: "Target",
     pickup: "Pickup", loadAt: "Load At", unloadFirst: "Unload", deliverTo: "Deliver To", returnTo: "Return To",
     fillTypes: "Fill Types", fillSearchPh: "Search fill types…",
+    seedType: "Seed Type", seedTypeNone: "None (keep current)",
     dialogAddStep: "Add Step", dialogEditStep: "Edit Step",
     dialogAddSupport: "Add Support Step", dialogEditSupport: "Edit Support Step",
     markerWaitInfo: "Sync marker: the vehicle waits here until its leader passes the matching “Unlock Follower” marker. No target or action needed.",
@@ -118,6 +122,7 @@ const I18N = {
     type: "Typ", mode: "Modus", action: "Aktion", target: "Ziel",
     pickup: "Abholung", loadAt: "Beladen bei", unloadFirst: "Entladen", deliverTo: "Liefern an", returnTo: "Zurück zu",
     fillTypes: "Fülltypen", fillSearchPh: "Fülltypen suchen…",
+    seedType: "Saatgut", seedTypeNone: "Keines (unverändert)",
     dialogAddStep: "Schritt hinzufügen", dialogEditStep: "Schritt bearbeiten",
     dialogAddSupport: "Unterstützungsschritt hinzufügen", dialogEditSupport: "Unterstützungsschritt bearbeiten",
     markerWaitInfo: "Sync-Marker: Das Fahrzeug wartet hier, bis sein Anführer den passenden „Folger freigeben“-Marker passiert. Kein Ziel/keine Aktion nötig.",
@@ -167,6 +172,23 @@ const I18N = {
 /* ============================================================
    FS25 base-game fill types (name = internal ID stored in XML)
    ============================================================ */
+
+// Sowable base-game FRUIT type names (not fill type names — GRASS's fill type is
+// GRASS_WINDROW, but the seed is stored as the fruit type "GRASS"). In-game the list comes
+// from g_fruitTypeManager, so a modded fruit can be missing here; an imported value that is
+// not in this list is kept and shown as an extra option rather than being dropped.
+const SEED_TYPES = [
+  ["WHEAT", "Wheat", "Weizen"], ["BARLEY", "Barley", "Gerste"], ["OAT", "Oat", "Hafer"],
+  ["CANOLA", "Canola", "Raps"], ["SORGHUM", "Sorghum", "Hirse"], ["MAIZE", "Corn", "Mais"],
+  ["SUNFLOWER", "Sunflower", "Sonnenblumen"], ["SOYBEAN", "Soybeans", "Sojabohnen"],
+  ["POTATO", "Potatoes", "Kartoffeln"], ["SUGARBEET", "Sugar Beet", "Zuckerrüben"],
+  ["COTTON", "Cotton", "Baumwolle"], ["SUGARCANE", "Sugarcane", "Zuckerrohr"],
+  ["GRAPE", "Grapes", "Trauben"], ["OLIVE", "Olives", "Oliven"], ["POPLAR", "Poplar", "Pappel"],
+  ["GRASS", "Grass", "Gras"], ["OILSEEDRADISH", "Oilseed Radish", "Ölrettich"],
+  ["PEA", "Peas", "Erbsen"], ["SPINACH", "Spinach", "Spinat"], ["GREENBEAN", "Green Beans", "Grüne Bohnen"],
+  ["CARROT", "Carrots", "Karotten"], ["PARSNIP", "Parsnips", "Pastinaken"], ["BEETROOT", "Red Beet", "Rote Bete"],
+  ["RICE", "Rice", "Reis"], ["RICELONGGRAIN", "Long Grain Rice", "Langkornreis"],
+];
 
 const FILL_TYPES = [
   ["WHEAT", "Wheat", "Weizen"], ["BARLEY", "Barley", "Gerste"], ["OAT", "Oat", "Hafer"],
@@ -371,6 +393,7 @@ function parseStepEl(el, withSupport) {
     action: attr(el, "action", "default"),
     unloadTarget: attr(el, "unloadTarget") || null,
     fillTypes: parseFillTypesAttr(attr(el, "fillTypes")) || parseFillTypesAttr(attr(el, "fillType")),
+    seedFruitType: attr(el, "seedFruitType") || null,
     // Legacy fields read for migration only.
     // No default for the sync flags: absent vs false must stay distinguishable — the flag
     // era only wrote them when false, pre-sync-era files never wrote them at all.
@@ -548,6 +571,7 @@ function stepAttrs(step) {
   }
   if (step.unloadTarget) s += ` unloadTarget="${xmlEscape(step.unloadTarget)}"`;
   if (step.fillTypes && step.fillTypes.length) s += ` fillTypes="${xmlEscape(step.fillTypes.join(","))}"`;
+  if (step.seedFruitType) s += ` seedFruitType="${xmlEscape(step.seedFruitType)}"`;
   return s;
 }
 
@@ -1031,6 +1055,7 @@ const modal = {
   type: STEP_AUTODRIVE,
   action: "drive",
   fillTypes: [],
+  seedFruitType: "",
 };
 
 function openStepModal(wf, { stepIndex = null, supportIndex = null, isNewSupport = false } = {}) {
@@ -1050,6 +1075,7 @@ function openStepModal(wf, { stepIndex = null, supportIndex = null, isNewSupport
     ? existing.action
     : (modal.type === STEP_COURSEPLAY ? "fieldwork" : "drive");
   modal.fillTypes = existing?.fillTypes ? [...existing.fillTypes] : [];
+  modal.seedFruitType = existing?.seedFruitType || "";
   $("stepTarget").value = existing?.target || "";
   $("stepUnloadTarget").value = existing?.unloadTarget || "";
   $("fillSearch").value = "";
@@ -1090,6 +1116,7 @@ function renderStepModal() {
       $("stepTarget").value = "";
       $("stepUnloadTarget").value = "";
       modal.fillTypes = [];
+      modal.seedFruitType = "";
       renderStepModal();
     });
     seg.append(b);
@@ -1104,6 +1131,7 @@ function renderStepModal() {
     $("markerInfo").textContent = t(stepInfoKey(modal.type));
     $("fieldUnloadTarget").hidden = true;
     $("fieldFillTypes").hidden = true;
+    $("fieldSeedType").hidden = true;
     return;
   }
 
@@ -1136,6 +1164,29 @@ function renderStepModal() {
   const needsFill = actionNeedsFillType(modal.type, modal.action);
   $("fieldFillTypes").hidden = !needsFill;
   if (needsFill) renderFillPicker();
+
+  const needsSeed = actionNeedsSeedType(modal.type, modal.action);
+  $("fieldSeedType").hidden = !needsSeed;
+  if (!needsSeed) modal.seedFruitType = "";
+  if (needsSeed) renderSeedTypeSelect();
+}
+
+function renderSeedTypeSelect() {
+  const names = SEED_TYPES.map(([name]) => name);
+  // Keep an imported value this list does not know (modded fruit) selectable
+  if (modal.seedFruitType && !names.includes(modal.seedFruitType)) names.push(modal.seedFruitType);
+
+  const options = [el("option", { value: "", selected: !modal.seedFruitType }, t("seedTypeNone"))];
+  for (const name of names) {
+    options.push(el("option", { value: name, selected: name === modal.seedFruitType }, seedTypeLabel(name)));
+  }
+  $("stepSeedType").replaceChildren(...options);
+}
+
+function seedTypeLabel(name) {
+  const entry = SEED_TYPES.find(([n]) => n === name);
+  if (!entry) return name;
+  return state.lang === "de" ? entry[2] : entry[1];
 }
 
 function saveStepModal() {
@@ -1153,6 +1204,10 @@ function saveStepModal() {
       const unload = $("stepUnloadTarget").value.trim();
       if (actionNeedsUnloadTarget(modal.type, modal.action) && unload) step.unloadTarget = unload;
       if (actionNeedsFillType(modal.type, modal.action) && modal.fillTypes.length) step.fillTypes = [...modal.fillTypes];
+    } else if (modal.type === STEP_COURSEPLAY) {
+      if (actionNeedsSeedType(modal.type, modal.action) && modal.seedFruitType) {
+        step.seedFruitType = modal.seedFruitType;
+      }
     }
     harvestStepTargets(step);
   }
@@ -1463,6 +1518,7 @@ function init() {
   $("stepForm").addEventListener("submit", (e) => { e.preventDefault(); saveStepModal(); });
   $("stepAction").addEventListener("change", () => { modal.action = $("stepAction").value; renderStepModal(); });
   $("fillSearch").addEventListener("input", renderFillPicker);
+  $("stepSeedType").addEventListener("change", (e) => { modal.seedFruitType = e.target.value; });
   setupCombo("stepTarget", "targetComboList", () => (modal.type === STEP_COURSEPLAY ? "cp" : "ad"));
   setupCombo("stepUnloadTarget", "unloadComboList", () => "ad");
 

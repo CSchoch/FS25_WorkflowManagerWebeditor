@@ -232,6 +232,7 @@ const LS_KEY = "fs25wm.webeditor.v1";
 const state = {
   workflows: [],
   hud: null,                 // {posX, posY} preserved from import for round-trip
+  general: null,             // {courseplayAutoResume} mod options preserved from import for round-trip
   selectedId: null,
   targets: { ad: [], cp: [] },
   customFillTypes: [],       // [{name, title}]
@@ -242,7 +243,7 @@ const state = {
 function saveState() {
   try {
     localStorage.setItem(LS_KEY, JSON.stringify({
-      workflows: state.workflows, hud: state.hud, selectedId: state.selectedId,
+      workflows: state.workflows, hud: state.hud, general: state.general, selectedId: state.selectedId,
       targets: state.targets, customFillTypes: state.customFillTypes,
       lang: state.lang, theme: state.theme,
     }));
@@ -256,6 +257,7 @@ function loadState() {
     const data = JSON.parse(raw);
     if (Array.isArray(data.workflows)) state.workflows = data.workflows;
     if (data.hud) state.hud = data.hud;
+    if (data.general) state.general = data.general;
     state.selectedId = data.selectedId || null;
     if (data.targets) state.targets = { ad: data.targets.ad || [], cp: data.targets.cp || [] };
     if (Array.isArray(data.customFillTypes)) state.customFillTypes = data.customFillTypes;
@@ -546,7 +548,14 @@ function importWorkflowsXml(xmlText) {
   const hudEl = root.querySelector(":scope > settings > hud");
   const hud = hudEl ? { posX: floatAttr(hudEl, "posX"), posY: floatAttr(hudEl, "posY") } : null;
 
-  return { workflows, hud, migrated: anyMigrated };
+  // Mod options from the game's General settings page (WMStorage writes them on every save).
+  // Dropping them on export would silently reset the player's choice to the default on next load.
+  const generalEl = root.querySelector(":scope > settings > general");
+  const general = generalEl && generalEl.hasAttribute("courseplayAutoResume")
+    ? { courseplayAutoResume: boolAttr(generalEl, "courseplayAutoResume", true) }
+    : null;
+
+  return { workflows, hud, general, migrated: anyMigrated };
 }
 
 /* ============================================================
@@ -603,9 +612,12 @@ function exportWorkflowsXml() {
     lines.push("        </workflow>");
   }
   lines.push("    </workflows>");
-  if (state.hud && state.hud.posX != null && state.hud.posY != null) {
+  const hasHud = state.hud && state.hud.posX != null && state.hud.posY != null;
+  const hasGeneral = state.general && typeof state.general.courseplayAutoResume === "boolean";
+  if (hasHud || hasGeneral) {
     lines.push("    <settings>");
-    lines.push(`        <hud posX="${fmtFloat(state.hud.posX)}" posY="${fmtFloat(state.hud.posY)}"/>`);
+    if (hasHud) lines.push(`        <hud posX="${fmtFloat(state.hud.posX)}" posY="${fmtFloat(state.hud.posY)}"/>`);
+    if (hasGeneral) lines.push(`        <general courseplayAutoResume="${state.general.courseplayAutoResume}"/>`);
     lines.push("    </settings>");
   }
   lines.push("</WorkflowManager>");
@@ -1387,6 +1399,9 @@ function addTargetFromInput(kind, inputId) {
 function applyImport(result) {
   state.workflows = result.workflows;
   if (result.hud && result.hud.posX != null) state.hud = result.hud;
+  // Replaced, not merged: options belong to the imported savegame, so one from a previously
+  // imported file must not be exported into this one.
+  state.general = result.general;
   for (const wf of state.workflows) {
     for (const step of wf.steps) {
       harvestStepTargets(step);

@@ -24,8 +24,8 @@ no game running, no build step, no dependencies. Deployable as a GitHub Page.
 - **Import** `workflowManager.xml` (file picker or drop anywhere on the page) — old save
   formats (linked-workflow pairs, per-step sync flags) are migrated exactly like
   `WorkflowStorage.lua` does in-game
-- **Export** a game-ready `workflowManager.xml` (formatVersion 2); HUD position from an
-  imported file is preserved
+- **Export** a game-ready `workflowManager.xml` (formatVersion 2); the HUD position and mod
+  settings (Courseplay auto-resume) from an imported file are preserved
 - **Target suggestions**: maintain AutoDrive destination / Courseplay course lists, import
   marker names straight from an `AutoDrive_config.xml`, or course names by picking your
   Courseplay `Courses` folder — names are kept root-relative (`Singleplayer/F34/Kalken`),

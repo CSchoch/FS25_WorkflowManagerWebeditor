@@ -18,14 +18,20 @@ no game running, no build step, no dependencies. Deployable as a GitHub Page.
   fill type IDs can be typed in)
 - **Support sub-steps**: nest support-vehicle steps under any main step, reorder them,
   edit and duplicate them (sync markers are not offered here — like in-game, leader/follower
-  pairing is built from main steps only)
+  pairing is built from main steps only). A sub-step can be set to **finish before switching**:
+  the support vehicle completes it before following the main vehicle to its next step
 - **AD/CP settings** per workflow: Unload Fill Level (%), Pipe Offset (m), Pre-Call Level (%)
 - **Reordering**: move buttons + drag & drop
+- **Open savegame** (Chrome/Edge): pick the savegame folder once — its `workflowManager.xml` is
+  loaded, and **Save to savegameN** writes straight back into it (File System Access API). The
+  folder stays linked across reloads; if the game changed the file since it was loaded, Save asks
+  before overwriting. Firefox/Safari don't offer the API, so there the button is hidden
 - **Import** `workflowManager.xml` (file picker or drop anywhere on the page) — old save
   formats (linked-workflow pairs, per-step sync flags) are migrated exactly like
   `WorkflowStorage.lua` does in-game
-- **Export** a game-ready `workflowManager.xml` (formatVersion 2); the HUD position and mod
-  settings (Courseplay auto-resume) from an imported file are preserved
+- **Export** a game-ready `workflowManager.xml` (formatVersion 2). It holds workflows only:
+  the mod's options and the HUD position are stored per player by the game
+  (`modSettings/FS25_WorkflowManager.xml`), so a `<settings>` block in an older file is ignored
 - **Target suggestions**: maintain AutoDrive destination / Courseplay course lists, import
   marker names straight from an `AutoDrive_config.xml`, or course names by picking your
   Courseplay `Courses` folder — names are kept root-relative (`Singleplayer/F34/Kalken`),
@@ -36,10 +42,13 @@ no game running, no build step, no dependencies. Deployable as a GitHub Page.
 
 1. Open the page (or `index.html` locally — no server needed).
 2. Build your workflows.
-3. **Export XML** and place `workflowManager.xml` in your savegame folder
-   (`.../My Games/FarmingSimulator2025/savegameN/`), replacing the existing file
-   while the game is closed.
-4. Or start from your current file: **Import XML** first.
+3. Chrome/Edge: **Open savegame** → pick `.../My Games/FarmingSimulator2025/savegameN/` →
+   edit → **Save to savegameN**. Done — no file copying.
+4. Any browser: **Export XML** and place `workflowManager.xml` in your savegame folder
+   (`.../My Games/FarmingSimulator2025/savegameN/`), replacing the existing file.
+   This works while the game is running: the game re-reads the file every time the
+   Workflow Manager window is opened. Workflows removed from the file are stopped.
+5. Or start from your current file: **Import XML** first.
 
 ## GitHub Pages deployment
 

@@ -59,6 +59,8 @@ const I18N = {
     pickup: "Pickup", loadAt: "Load At", unloadFirst: "Unload", deliverTo: "Deliver To", returnTo: "Return To",
     fillTypes: "Fill Types", fillSearchPh: "Search fill types…",
     seedType: "Seed Type", seedTypeNone: "None (keep current)",
+    finishBeforeSwitch: "Finish before switching", optNo: "No", optYes: "Yes",
+    finishBeforeSwitchHint: "When the main vehicle moves on to its next step while this support step runs, finish it first, then follow the main vehicle.",
     dialogAddStep: "Add Step", dialogEditStep: "Edit Step",
     dialogAddSupport: "Add Support Step", dialogEditSupport: "Edit Support Step",
     markerWaitInfo: "Sync marker: the vehicle waits here until its leader passes the matching “Unlock Follower” marker. No target or action needed.",
@@ -102,6 +104,17 @@ const I18N = {
     metaId: "ID", metaSteps: "Steps", metaSupport: "Support steps",
     moveUp: "Move up", moveDown: "Move down", edit: "Edit", langName: "EN",
     dropHere: "Drop workflowManager.xml to import",
+    openSavegameBtn: "Open savegame",
+    openSavegameTitle: "Pick your savegame folder (…/FarmingSimulator2025/savegameN): its workflowManager.xml is loaded and Save writes straight back into it.",
+    saveToBtn: (d) => `Save to ${d}`,
+    saveToTitle: (d) => `Write workflowManager.xml directly into ${d}. The game picks it up the next time the Workflow Manager window opens.`,
+    overwrite: "Overwrite",
+    confirmOverwriteChanged: (d) => `workflowManager.xml in ${d} was changed since it was loaded here (e.g. saved in-game). Overwrite it? Use “Open savegame” to load the newer file instead.`,
+    toastSaved: (d) => `Saved to ${d}/workflowManager.xml`,
+    toastSaveFailed: (d) => `Could not write to ${d} — check the folder still exists and access is allowed`,
+    toastSavegameReadFailed: "Could not read that folder",
+    toastSavegameNoFile: (d) => `${d} has no workflowManager.xml yet — Save will create it`,
+    toastNotSavegame: (d) => `${d} does not look like a savegame folder (no careerSavegame.xml)`,
   },
   de: {
     appTitle: "Workflow Manager", appSubtitle: "FS25 Web-Editor",
@@ -123,6 +136,8 @@ const I18N = {
     pickup: "Abholung", loadAt: "Beladen bei", unloadFirst: "Entladen", deliverTo: "Liefern an", returnTo: "Zurück zu",
     fillTypes: "Fülltypen", fillSearchPh: "Fülltypen suchen…",
     seedType: "Saatgut", seedTypeNone: "Keines (unverändert)",
+    finishBeforeSwitch: "Vor dem Wechsel abschließen", optNo: "Nein", optYes: "Ja",
+    finishBeforeSwitchHint: "Wechselt das Hauptfahrzeug zu seinem nächsten Schritt, während dieser Unterstützungsschritt läuft, wird er erst beendet, dann folgt das Fahrzeug.",
     dialogAddStep: "Schritt hinzufügen", dialogEditStep: "Schritt bearbeiten",
     dialogAddSupport: "Unterstützungsschritt hinzufügen", dialogEditSupport: "Unterstützungsschritt bearbeiten",
     markerWaitInfo: "Sync-Marker: Das Fahrzeug wartet hier, bis sein Anführer den passenden „Folger freigeben“-Marker passiert. Kein Ziel/keine Aktion nötig.",
@@ -166,6 +181,17 @@ const I18N = {
     metaId: "ID", metaSteps: "Schritte", metaSupport: "Unterstützungsschritte",
     moveUp: "Nach oben", moveDown: "Nach unten", edit: "Bearbeiten", langName: "DE",
     dropHere: "workflowManager.xml zum Importieren ablegen",
+    openSavegameBtn: "Spielstand öffnen",
+    openSavegameTitle: "Wähle deinen Spielstand-Ordner (…/FarmingSimulator2025/savegameN): seine workflowManager.xml wird geladen und Speichern schreibt direkt dorthin zurück.",
+    saveToBtn: (d) => `In ${d} speichern`,
+    saveToTitle: (d) => `workflowManager.xml direkt in ${d} schreiben. Das Spiel übernimmt sie beim nächsten Öffnen des Workflow-Manager-Fensters.`,
+    overwrite: "Überschreiben",
+    confirmOverwriteChanged: (d) => `Die workflowManager.xml in ${d} wurde geändert, seit sie hier geladen wurde (z. B. im Spiel gespeichert). Überschreiben? Mit „Spielstand öffnen“ lädst du stattdessen die neuere Datei.`,
+    toastSaved: (d) => `In ${d}/workflowManager.xml gespeichert`,
+    toastSaveFailed: (d) => `Schreiben nach ${d} fehlgeschlagen — existiert der Ordner noch und ist der Zugriff erlaubt?`,
+    toastSavegameReadFailed: "Ordner konnte nicht gelesen werden",
+    toastSavegameNoFile: (d) => `${d} enthält noch keine workflowManager.xml — Speichern legt sie an`,
+    toastNotSavegame: (d) => `${d} sieht nicht wie ein Spielstand-Ordner aus (keine careerSavegame.xml)`,
   },
 };
 
@@ -229,10 +255,10 @@ const FILL_TYPES = [
 
 const LS_KEY = "fs25wm.webeditor.v1";
 
+// Mod options and the HUD position are stored per player in the game's
+// modSettings/FS25_WorkflowManager.xml, no longer in workflowManager.xml (mirrors WMStorage).
 const state = {
   workflows: [],
-  hud: null,                 // {posX, posY} preserved from import for round-trip
-  general: null,             // {courseplayAutoResume} mod options preserved from import for round-trip
   selectedId: null,
   targets: { ad: [], cp: [] },
   customFillTypes: [],       // [{name, title}]
@@ -243,7 +269,7 @@ const state = {
 function saveState() {
   try {
     localStorage.setItem(LS_KEY, JSON.stringify({
-      workflows: state.workflows, hud: state.hud, general: state.general, selectedId: state.selectedId,
+      workflows: state.workflows, selectedId: state.selectedId,
       targets: state.targets, customFillTypes: state.customFillTypes,
       lang: state.lang, theme: state.theme,
     }));
@@ -256,8 +282,6 @@ function loadState() {
     if (!raw) return;
     const data = JSON.parse(raw);
     if (Array.isArray(data.workflows)) state.workflows = data.workflows;
-    if (data.hud) state.hud = data.hud;
-    if (data.general) state.general = data.general;
     state.selectedId = data.selectedId || null;
     if (data.targets) state.targets = { ad: data.targets.ad || [], cp: data.targets.cp || [] };
     if (Array.isArray(data.customFillTypes)) state.customFillTypes = data.customFillTypes;
@@ -407,6 +431,9 @@ function parseStepEl(el, withSupport) {
     step.support = [...el.children]
       .filter((c) => c.tagName === "support")
       .map((c) => parseStepEl(c, false));
+  } else if (boolAttr(el, "finishBeforeSwitch", false)) {
+    // Support sub-steps only: finish before following the main vehicle to its next step
+    step.finishBeforeSwitch = true;
   }
   return step;
 }
@@ -545,17 +572,9 @@ function importWorkflowsXml(xmlText) {
     seenIds.add(wf.id);
   }
 
-  const hudEl = root.querySelector(":scope > settings > hud");
-  const hud = hudEl ? { posX: floatAttr(hudEl, "posX"), posY: floatAttr(hudEl, "posY") } : null;
-
-  // Mod options from the game's General settings page (WMStorage writes them on every save).
-  // Dropping them on export would silently reset the player's choice to the default on next load.
-  const generalEl = root.querySelector(":scope > settings > general");
-  const general = generalEl && generalEl.hasAttribute("courseplayAutoResume")
-    ? { courseplayAutoResume: boolAttr(generalEl, "courseplayAutoResume", true) }
-    : null;
-
-  return { workflows, hud, general, migrated: anyMigrated };
+  // A <settings> block from older files is ignored: the game keeps its options and the HUD
+  // position per player now and only adopts that block once from an old savegame.
+  return { workflows, migrated: anyMigrated };
 }
 
 /* ============================================================
@@ -581,6 +600,7 @@ function stepAttrs(step) {
   if (step.unloadTarget) s += ` unloadTarget="${xmlEscape(step.unloadTarget)}"`;
   if (step.fillTypes && step.fillTypes.length) s += ` fillTypes="${xmlEscape(step.fillTypes.join(","))}"`;
   if (step.seedFruitType) s += ` seedFruitType="${xmlEscape(step.seedFruitType)}"`;
+  if (step.finishBeforeSwitch) s += ` finishBeforeSwitch="true"`;
   return s;
 }
 
@@ -612,14 +632,6 @@ function exportWorkflowsXml() {
     lines.push("        </workflow>");
   }
   lines.push("    </workflows>");
-  const hasHud = state.hud && state.hud.posX != null && state.hud.posY != null;
-  const hasGeneral = state.general && typeof state.general.courseplayAutoResume === "boolean";
-  if (hasHud || hasGeneral) {
-    lines.push("    <settings>");
-    if (hasHud) lines.push(`        <hud posX="${fmtFloat(state.hud.posX)}" posY="${fmtFloat(state.hud.posY)}"/>`);
-    if (hasGeneral) lines.push(`        <general courseplayAutoResume="${state.general.courseplayAutoResume}"/>`);
-    lines.push("    </settings>");
-  }
   lines.push("</WorkflowManager>");
   lines.push("");
   return lines.join("\n");
@@ -757,6 +769,10 @@ function applyI18nStatic() {
   $("btnQuickPark").title = t("typePark");
   $("btnQuickRefuel").title = t("typeRefuel");
   $("btnQuickRepair").title = t("typeRepair");
+  $("btnOpenSavegame").hidden = !canLinkSavegame;
+  $("btnOpenSavegame").title = t("openSavegameTitle");
+  $("exportLabel").textContent = link.dir ? t("saveToBtn", link.dir.name) : t("exportBtn");
+  $("btnExport").title = link.dir ? t("saveToTitle", link.dir.name) : "";
 }
 
 function applyTheme() {
@@ -1068,6 +1084,7 @@ const modal = {
   action: "drive",
   fillTypes: [],
   seedFruitType: "",
+  finishBeforeSwitch: false,
 };
 
 function openStepModal(wf, { stepIndex = null, supportIndex = null, isNewSupport = false } = {}) {
@@ -1088,6 +1105,7 @@ function openStepModal(wf, { stepIndex = null, supportIndex = null, isNewSupport
     : (modal.type === STEP_COURSEPLAY ? "fieldwork" : "drive");
   modal.fillTypes = existing?.fillTypes ? [...existing.fillTypes] : [];
   modal.seedFruitType = existing?.seedFruitType || "";
+  modal.finishBeforeSwitch = existing?.finishBeforeSwitch === true;
   $("stepTarget").value = existing?.target || "";
   $("stepUnloadTarget").value = existing?.unloadTarget || "";
   $("fillSearch").value = "";
@@ -1114,6 +1132,23 @@ function modalStepTypes() {
   return STEP_TYPES.filter((t) => !isSyncMarkerType(t));
 }
 
+/** "Finish before switching": support sub-steps that run an AD/CP job
+ *  (mirrors WMStepDialog:canFinishBeforeSwitch). */
+function modalCanFinishBeforeSwitch() {
+  const isSupport = modal.isNewSupport || modal.supportIndex != null;
+  return isSupport && !isSyncMarkerType(modal.type);
+}
+
+function renderFinishBeforeSwitch() {
+  const show = modalCanFinishBeforeSwitch();
+  $("fieldFinishBeforeSwitch").hidden = !show;
+  if (!show) return;
+  $("stepFinishBeforeSwitch").replaceChildren(
+    el("option", { value: "no", selected: !modal.finishBeforeSwitch }, t("optNo")),
+    el("option", { value: "yes", selected: modal.finishBeforeSwitch }, t("optYes")),
+  );
+}
+
 function renderStepModal() {
   // Type segmented control
   const seg = $("stepTypeSeg");
@@ -1133,6 +1168,9 @@ function renderStepModal() {
     });
     seg.append(b);
   }
+
+  // Before the marker early-out: Park/Refuel/Repair sub-steps take that branch too
+  renderFinishBeforeSwitch();
 
   const marker = isMarkerType(modal.type);
   $("markerInfo").hidden = !marker;
@@ -1223,6 +1261,7 @@ function saveStepModal() {
     }
     harvestStepTargets(step);
   }
+  if (modalCanFinishBeforeSwitch() && modal.finishBeforeSwitch) step.finishBeforeSwitch = true;
 
   if (modal.isNewSupport) {
     const main = wf.steps[modal.stepIndex];
@@ -1398,10 +1437,6 @@ function addTargetFromInput(kind, inputId) {
 
 function applyImport(result) {
   state.workflows = result.workflows;
-  if (result.hud && result.hud.posX != null) state.hud = result.hud;
-  // Replaced, not merged: options belong to the imported savegame, so one from a previously
-  // imported file must not be exported into this one.
-  state.general = result.general;
   for (const wf of state.workflows) {
     for (const step of wf.steps) {
       harvestStepTargets(step);
@@ -1414,18 +1449,22 @@ function applyImport(result) {
   commit();
 }
 
+/** @param onApplied runs only once the import is accepted (not when the confirm is cancelled). */
+function handleWorkflowText(text, onApplied) {
+  const result = importWorkflowsXml(text);
+  if (!result) { toast(t("toastImportFailed"), true); return; }
+  const apply = () => { if (onApplied) onApplied(); applyImport(result); };
+  // An import replaces everything and autosaves over localStorage right after — there is no
+  // undo, and the page can be dropped on by accident, so confirm while something is at stake.
+  if (state.workflows.length > 0) {
+    askConfirm(t("confirmImportReplace", state.workflows.length), apply, "replace");
+  } else {
+    apply();
+  }
+}
+
 function handleWorkflowFile(file) {
-  file.text().then((text) => {
-    const result = importWorkflowsXml(text);
-    if (!result) { toast(t("toastImportFailed"), true); return; }
-    // An import replaces everything and autosaves over localStorage right after — there is no
-    // undo, and the page can be dropped on by accident, so confirm while something is at stake.
-    if (state.workflows.length > 0) {
-      askConfirm(t("confirmImportReplace", state.workflows.length), () => applyImport(result), "replace");
-    } else {
-      applyImport(result);
-    }
-  });
+  file.text().then((text) => handleWorkflowText(text));
 }
 
 function downloadExport() {
@@ -1438,6 +1477,108 @@ function downloadExport() {
   a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
   toast(t("toastExported"));
+}
+
+/* ============================================================
+   Savegame folder link (File System Access API — Chromium browsers only;
+   everywhere else Import/Export via file picker and download stays the only way)
+   ============================================================ */
+
+const WM_FILE = "workflowManager.xml";
+const canLinkSavegame = typeof window.showDirectoryPicker === "function";
+// The linked savegame folder, and the file's lastModified when this editor last read or wrote
+// it. The game rewrites the file on every in-game edit and game save, so a different value on
+// Save means writing now would silently drop those changes.
+const link = { dir: null, mtime: null };
+
+/** Runs one request against the "handles" IndexedDB store — localStorage cannot hold a
+ *  directory handle, IndexedDB can, so the link survives a page reload. */
+function idbHandles(mode, makeRequest) {
+  return new Promise((resolve, reject) => {
+    const open = indexedDB.open("fs25wm.webeditor", 1);
+    open.onupgradeneeded = () => open.result.createObjectStore("handles");
+    open.onerror = () => reject(open.error);
+    open.onsuccess = () => {
+      const db = open.result;
+      const tx = db.transaction("handles", mode);
+      const req = makeRequest(tx.objectStore("handles"));
+      tx.oncomplete = () => { db.close(); resolve(req.result); };
+      tx.onerror = () => { db.close(); reject(tx.error); };
+    };
+  });
+}
+
+function storeLink() {
+  idbHandles("readwrite", (s) => s.put({ dir: link.dir, mtime: link.mtime }, "savegame"))
+    .catch(() => { /* blocked storage — the link just lasts until the page is closed */ });
+}
+
+async function restoreLink() {
+  if (!canLinkSavegame) return;
+  try {
+    const saved = await idbHandles("readonly", (s) => s.get("savegame"));
+    if (saved && saved.dir) { link.dir = saved.dir; link.mtime = saved.mtime ?? null; }
+  } catch (e) { /* blocked storage — start unlinked */ }
+}
+
+async function readSavegameFile(dir) {
+  try {
+    return await (await dir.getFileHandle(WM_FILE)).getFile();
+  } catch (e) {
+    if (e.name === "NotFoundError") return null;
+    throw e;
+  }
+}
+
+async function openSavegame() {
+  let dir;
+  try {
+    dir = await window.showDirectoryPicker({ mode: "readwrite", startIn: link.dir || "documents" });
+  } catch (e) { return; } // picker cancelled
+  let file;
+  try {
+    const isSavegame = await dir.getFileHandle("careerSavegame.xml").then(() => true, () => false);
+    if (!isSavegame) toast(t("toastNotSavegame", dir.name), true);
+    file = await readSavegameFile(dir);
+  } catch (e) { toast(t("toastSavegameReadFailed"), true); return; }
+  const linkTo = () => { link.dir = dir; link.mtime = file ? file.lastModified : null; storeLink(); };
+  if (!file) {
+    linkTo();
+    toast(t("toastSavegameNoFile", dir.name));
+    render();
+    return;
+  }
+  handleWorkflowText(await file.text(), linkTo);
+}
+
+async function writeSavegameFile() {
+  try {
+    const handle = await link.dir.getFileHandle(WM_FILE, { create: true });
+    const writable = await handle.createWritable();
+    await writable.write(exportWorkflowsXml());
+    await writable.close();
+    link.mtime = (await handle.getFile()).lastModified;
+    storeLink();
+    toast(t("toastSaved", link.dir.name));
+  } catch (e) { toast(t("toastSaveFailed", link.dir.name), true); }
+}
+
+async function saveToSavegame() {
+  if (state.workflows.length === 0) { toast(t("toastNothingToExport"), true); return; }
+  let current;
+  try {
+    // A restored link needs its permission re-granted after a reload; requestPermission only
+    // works inside the click that triggered this save.
+    const opts = { mode: "readwrite" };
+    if ((await link.dir.queryPermission(opts)) !== "granted"
+      && (await link.dir.requestPermission(opts)) !== "granted") return;
+    current = await readSavegameFile(link.dir);
+  } catch (e) { toast(t("toastSaveFailed", link.dir.name), true); return; }
+  if (current && current.lastModified !== link.mtime) {
+    askConfirm(t("confirmOverwriteChanged", link.dir.name), writeSavegameFile, "overwrite");
+    return;
+  }
+  writeSavegameFile();
 }
 
 /* ============================================================
@@ -1468,7 +1609,8 @@ function init() {
     if (e.target.files[0]) handleWorkflowFile(e.target.files[0]);
     e.target.value = "";
   });
-  $("btnExport").addEventListener("click", downloadExport);
+  $("btnOpenSavegame").addEventListener("click", openSavegame);
+  $("btnExport").addEventListener("click", () => (link.dir ? saveToSavegame() : downloadExport()));
 
   $("btnTargets").addEventListener("click", () => { renderTargetsModal(); $("targetsModal").showModal(); });
 
@@ -1534,6 +1676,7 @@ function init() {
   $("stepAction").addEventListener("change", () => { modal.action = $("stepAction").value; renderStepModal(); });
   $("fillSearch").addEventListener("input", renderFillPicker);
   $("stepSeedType").addEventListener("change", (e) => { modal.seedFruitType = e.target.value; });
+  $("stepFinishBeforeSwitch").addEventListener("change", (e) => { modal.finishBeforeSwitch = e.target.value === "yes"; });
   setupCombo("stepTarget", "targetComboList", () => (modal.type === STEP_COURSEPLAY ? "cp" : "ad"));
   setupCombo("stepUnloadTarget", "unloadComboList", () => "ad");
 
@@ -1598,6 +1741,7 @@ function init() {
   });
 
   render();
+  restoreLink().then(() => { if (link.dir) render(); });
 }
 
 document.addEventListener("DOMContentLoaded", init);

@@ -39,9 +39,13 @@ try {
       <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 21h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <span data-i18n="importBtn">Import XML</span>
     </button>
+    <button class="btn ghost" id="btnOpenSavegame" hidden>
+      <svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      <span data-i18n="openSavegameBtn">Open savegame</span>
+    </button>
     <button class="btn primary" id="btnExport">
       <svg viewBox="0 0 24 24"><path d="M12 15V3m0 0L8 7m4-4 4 4M4 21h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span data-i18n="exportBtn">Export XML</span>
+      <span id="exportLabel">Export XML</span>
     </button>
     <div class="topbar-sep"></div>
     <button class="icon-btn" id="btnLang" title="Language / Sprache"><span id="langLabel">EN</span></button>
@@ -192,6 +196,12 @@ try {
       <div class="field" id="fieldSeedType" hidden>
         <label data-i18n="seedType">Seed Type</label>
         <div class="select-wrap"><select id="stepSeedType"></select></div>
+      </div>
+
+      <div class="field" id="fieldFinishBeforeSwitch" hidden>
+        <label for="stepFinishBeforeSwitch" data-i18n="finishBeforeSwitch">Finish before switching</label>
+        <div class="select-wrap"><select id="stepFinishBeforeSwitch"></select></div>
+        <p class="field-hint" data-i18n="finishBeforeSwitchHint">When the main vehicle moves on to its next step while this support step runs, finish it first, then follow the main vehicle.</p>
       </div>
 
       <div class="field" id="fieldFillTypes" hidden>

@@ -256,7 +256,7 @@ try {
     <div class="tg-body">
       <!-- Each half: name + count, where the list comes from, filter-or-add, grouped list.
            The halves share subgrid rows so both lists start at the same height. -->
-      <section class="tg-panel ad" aria-labelledby="adTitle">
+      <section class="tg-panel ad" id="adPanel" aria-labelledby="adTitle">
         <header class="tg-head">
           <span class="type-badge ad" data-i18n="typeAd">AutoDrive</span>
           <h4 id="adTitle" data-i18n="tgAdTitle">Destinations</h4>
@@ -273,7 +273,7 @@ try {
         </div>
         <ul class="target-items" id="adTargetItems"></ul>
       </section>
-      <section class="tg-panel cp" aria-labelledby="cpTitle">
+      <section class="tg-panel cp" id="cpPanel" aria-labelledby="cpTitle">
         <header class="tg-head">
           <span class="type-badge cp" data-i18n="typeCp">Courseplay</span>
           <h4 id="cpTitle" data-i18n="tgCpTitle">Courses</h4>
@@ -295,6 +295,24 @@ try {
     <footer class="modal-foot tg-foot">
       <p data-i18n="targetsHint">Step dialogs suggest these names as you type. Names your workflows use are always listed.</p>
       <button type="button" class="btn primary" data-close="targetsModal" data-i18n="done">Done</button>
+    </footer>
+  </div>
+</dialog>
+
+<!-- ============ Savegame chooser ============
+     Opening the game's user folder (…/FarmingSimulator2025) instead of one savegame: pick which. -->
+<dialog id="savegameModal" class="modal" aria-labelledby="savegameTitle">
+  <div class="modal-inner">
+    <header class="modal-head">
+      <div class="tg-title">
+        <h3 id="savegameTitle" data-i18n="sgTitle">Open which savegame?</h3>
+        <p id="savegameScope"></p>
+      </div>
+      <button type="button" class="icon-btn" data-close="savegameModal" aria-label="Close">✕</button>
+    </header>
+    <ul class="sg-list" id="savegameList"></ul>
+    <footer class="modal-foot">
+      <button type="button" class="btn ghost" data-close="savegameModal" data-i18n="cancel">Cancel</button>
     </footer>
   </div>
 </dialog>

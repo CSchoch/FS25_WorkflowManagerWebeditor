@@ -45,7 +45,7 @@ const I18N = {
     searchPlaceholder: "Search workflows…", newWorkflow: "New workflow",
     emptyTitle: "Plan your farm's day — before you even start the game",
     emptyText: "Create AutoDrive &amp; Courseplay workflows here, then export <code>workflowManager.xml</code> into your savegame folder.",
-    emptyTextOpen: "Open a savegame folder to edit its workflows in place, or start a new AutoDrive &amp; Courseplay workflow here.",
+    emptyTextOpen: "Open a savegame folder, or the whole FarmingSimulator2025 folder, to edit its workflows in place. Or start a new AutoDrive &amp; Courseplay workflow here.",
     emptyHint: "Tip: you can also drop a workflowManager.xml file anywhere on this page.",
     namePlaceholder: "Workflow name", duplicate: "Duplicate", delete: "Delete", cancel: "Cancel",
     save: "Save", add: "Add", done: "Done", replace: "Replace",
@@ -134,7 +134,7 @@ const I18N = {
     dropHereFolder: "Drop a savegame folder to open it, or workflowManager.xml to import",
     emptyHintFolder: "Tip: you can also drop a savegame folder or a workflowManager.xml file anywhere on this page.",
     openSavegameBtn: "Open savegame",
-    openSavegameTitle: "Pick your savegame folder (…/FarmingSimulator2025/savegameN): its workflowManager.xml is loaded and Save writes straight back into it.",
+    openSavegameTitle: "Pick a savegame folder (…/FarmingSimulator2025/savegameN), or the FarmingSimulator2025 folder itself to also find Courseplay's courses. Its workflowManager.xml is loaded and Save writes straight back into it.",
     saveToBtn: (d) => `Save to ${d}`,
     saveToTitle: (d) => `Write workflowManager.xml directly into ${d}. The game picks it up the next time the Workflow Manager window opens.`,
     overwrite: "Overwrite",
@@ -143,18 +143,27 @@ const I18N = {
     toastSaveFailed: (d) => `Could not write to ${d} — check the folder still exists and access is allowed`,
     toastSavegameReadFailed: "Could not read that folder",
     toastSavegameNoFile: (d) => `${d} has no workflowManager.xml yet — Save will create it`,
-    toastNotSavegame: (d) => `${d} does not look like a savegame folder (no careerSavegame.xml)`,
+    toastNotSavegame: (d) => `${d} is neither a savegame folder (no careerSavegame.xml) nor the FarmingSimulator2025 folder`,
+    toastNoSavegames: (d) => `No savegames in ${d} yet`,
+    toastCpFound: "Courseplay's Courses folder found and linked",
+    sgTitle: "Open which savegame?",
+    sgScope: (d) => `In ${d}, most recently saved first`,
+    sgNameSlot: (n, slot) => `${n}, ${slot}`,
+    sgOpenNow: "Open now", sgHasWorkflows: "Has workflows",
+    tgAdNeedMissing: (d) => `No AutoDrive_config.xml in ${d}, but your workflows use AutoDrive. AutoDrive writes it when the game is saved — import one by hand, or type destinations below.`,
+    tgAdNeedFailed: "AutoDrive_config.xml could not be read. Import it by hand, or type destinations below.",
+    tgCpNeedUnlinked: "Courses are kept outside the savegame, so they could not be found. Link …/FarmingSimulator2025/\u200BmodSettings/\u200BFS25_Courseplay/\u200BCourses once — or open the FarmingSimulator2025 folder instead of a savegame, which finds it by itself.",
+    tgCpNeedPermission: "The browser needs your permission again to read the linked Courses folder.",
+    tgCpNeedOtherMap: (linked, m) => `The linked folder only holds map ${linked}, this savegame plays ${m}. Link the Courses folder itself to cover every map.`,
+    tgCpNeedFailed: "The linked Courses folder could not be read — it may have moved. Link it again.",
+    allowAccess: "Allow access",
     reloadBtn: "Reload",
     reloadTitle: (d) => `Read workflowManager.xml, AutoDrive destinations and Courseplay courses from ${d} again — e.g. after changing them in-game.`,
     confirmReloadDiscard: (d) => `Reload from ${d}? Changes made here that were not saved to ${d} are lost.`,
     toastAdScanned: (n) => `${n} AutoDrive destination(s) read from AutoDrive_config.xml`,
-    toastAdScanFailed: "Could not read AutoDrive_config.xml",
     toastCpScanned: (n, m) => `${n} Courseplay course(s) found for map ${m}`,
-    toastCpScanFailed: "Could not read the Courseplay folder — link it again under “Targets”",
-    toastCpNoPermission: "No access to the Courseplay folder — click Reload to allow it",
     toastCpLinked: "Courseplay folder linked",
     toastNotCoursesFolder: (d) => `${d} is neither Courseplay's “Courses” folder (…/modSettings/FS25_Courseplay/Courses) nor a map folder inside it`,
-    toastCpOtherMap: (linked, m) => `The linked Courseplay folder is for map ${linked}, this savegame uses ${m} — link the “Courses” folder to cover every map`,
   },
   de: {
     appTitle: "Workflow Manager", appSubtitle: "FS25 Web-Editor",
@@ -162,7 +171,7 @@ const I18N = {
     searchPlaceholder: "Workflows suchen…", newWorkflow: "Neuer Workflow",
     emptyTitle: "Plane den Hoftag — noch bevor das Spiel startet",
     emptyText: "Erstelle hier AutoDrive- &amp; Courseplay-Workflows und exportiere <code>workflowManager.xml</code> in deinen Spielstand-Ordner.",
-    emptyTextOpen: "Öffne einen Spielstand-Ordner, um seine Workflows direkt zu bearbeiten, oder lege hier einen neuen AutoDrive- &amp; Courseplay-Workflow an.",
+    emptyTextOpen: "Öffne einen Spielstand-Ordner oder gleich den ganzen Ordner FarmingSimulator2025, um seine Workflows direkt zu bearbeiten. Oder lege hier einen neuen AutoDrive- &amp; Courseplay-Workflow an.",
     emptyHint: "Tipp: Du kannst eine workflowManager.xml auch einfach auf diese Seite ziehen.",
     namePlaceholder: "Workflow-Name", duplicate: "Duplizieren", delete: "Löschen", cancel: "Abbrechen",
     save: "Speichern", add: "Hinzufügen", done: "Fertig", replace: "Ersetzen",
@@ -251,7 +260,7 @@ const I18N = {
     dropHereFolder: "Spielstand-Ordner zum Öffnen ablegen, oder workflowManager.xml zum Importieren",
     emptyHintFolder: "Tipp: Du kannst auch einen Spielstand-Ordner oder eine workflowManager.xml irgendwo auf dieser Seite ablegen.",
     openSavegameBtn: "Spielstand öffnen",
-    openSavegameTitle: "Wähle deinen Spielstand-Ordner (…/FarmingSimulator2025/savegameN): seine workflowManager.xml wird geladen und Speichern schreibt direkt dorthin zurück.",
+    openSavegameTitle: "Wähle einen Spielstand-Ordner (…/FarmingSimulator2025/savegameN) oder den Ordner FarmingSimulator2025 selbst, um auch Courseplays Kurse zu finden. Seine workflowManager.xml wird geladen und Speichern schreibt direkt dorthin zurück.",
     saveToBtn: (d) => `In ${d} speichern`,
     saveToTitle: (d) => `workflowManager.xml direkt in ${d} schreiben. Das Spiel übernimmt sie beim nächsten Öffnen des Workflow-Manager-Fensters.`,
     overwrite: "Überschreiben",
@@ -260,18 +269,27 @@ const I18N = {
     toastSaveFailed: (d) => `Schreiben nach ${d} fehlgeschlagen — existiert der Ordner noch und ist der Zugriff erlaubt?`,
     toastSavegameReadFailed: "Ordner konnte nicht gelesen werden",
     toastSavegameNoFile: (d) => `${d} enthält noch keine workflowManager.xml — Speichern legt sie an`,
-    toastNotSavegame: (d) => `${d} sieht nicht wie ein Spielstand-Ordner aus (keine careerSavegame.xml)`,
+    toastNotSavegame: (d) => `${d} ist weder ein Spielstand-Ordner (keine careerSavegame.xml) noch der Ordner FarmingSimulator2025`,
+    toastNoSavegames: (d) => `Noch keine Spielstände in ${d}`,
+    toastCpFound: "Courseplays Ordner „Courses“ gefunden und verknüpft",
+    sgTitle: "Welchen Spielstand öffnen?",
+    sgScope: (d) => `In ${d}, zuletzt gespeicherte zuerst`,
+    sgNameSlot: (n, slot) => `${n}, ${slot}`,
+    sgOpenNow: "Gerade offen", sgHasWorkflows: "Mit Workflows",
+    tgAdNeedMissing: (d) => `Keine AutoDrive_config.xml in ${d}, aber deine Workflows nutzen AutoDrive. AutoDrive schreibt sie beim Speichern des Spiels — importiere eine von Hand oder tippe Ziele unten ein.`,
+    tgAdNeedFailed: "AutoDrive_config.xml konnte nicht gelesen werden. Importiere sie von Hand oder tippe Ziele unten ein.",
+    tgCpNeedUnlinked: "Kurse liegen außerhalb des Spielstands und wurden deshalb nicht gefunden. Verknüpfe einmalig …/FarmingSimulator2025/\u200BmodSettings/\u200BFS25_Courseplay/\u200BCourses — oder öffne statt eines Spielstands den Ordner FarmingSimulator2025, dann wird er von selbst gefunden.",
+    tgCpNeedPermission: "Der Browser braucht erneut deine Erlaubnis, den verknüpften Ordner „Courses“ zu lesen.",
+    tgCpNeedOtherMap: (linked, m) => `Der verknüpfte Ordner enthält nur die Karte ${linked}, dieser Spielstand spielt ${m}. Verknüpfe den Ordner „Courses“ selbst, um alle Karten abzudecken.`,
+    tgCpNeedFailed: "Der verknüpfte Ordner „Courses“ konnte nicht gelesen werden — vielleicht wurde er verschoben. Verknüpfe ihn erneut.",
+    allowAccess: "Zugriff erlauben",
     reloadBtn: "Neu laden",
     reloadTitle: (d) => `workflowManager.xml, AutoDrive-Ziele und Courseplay-Kurse erneut aus ${d} lesen — z. B. nach Änderungen im Spiel.`,
     confirmReloadDiscard: (d) => `Aus ${d} neu laden? Änderungen, die hier gemacht und nicht nach ${d} gespeichert wurden, gehen verloren.`,
     toastAdScanned: (n) => `${n} AutoDrive-Ziel(e) aus AutoDrive_config.xml gelesen`,
-    toastAdScanFailed: "AutoDrive_config.xml konnte nicht gelesen werden",
     toastCpScanned: (n, m) => `${n} Courseplay-Kurs(e) für Karte ${m} gefunden`,
-    toastCpScanFailed: "Courseplay-Ordner konnte nicht gelesen werden — unter „Ziele“ neu verknüpfen",
-    toastCpNoPermission: "Kein Zugriff auf den Courseplay-Ordner — zum Erlauben „Neu laden“ klicken",
     toastCpLinked: "Courseplay-Ordner verknüpft",
     toastNotCoursesFolder: (d) => `${d} ist weder der Courseplay-Ordner „Courses“ (…/modSettings/FS25_Courseplay/Courses) noch ein Karten-Ordner darin`,
-    toastCpOtherMap: (linked, m) => `Der verknüpfte Courseplay-Ordner gehört zur Karte ${linked}, dieser Spielstand nutzt ${m} — verknüpfe den Ordner „Courses“, um alle Karten abzudecken`,
   },
 };
 
@@ -1652,19 +1670,34 @@ const TARGET_ADD = { ad: "btnAddAdTarget", cp: "btnAddCpTarget" };
 function renderTargetsModal() {
   $("targetsScope").textContent = link.dir ? t("targetsScope", link.dir.name) : t("targetsScopeNone");
 
-  // A savegame scan replaces the list, so a manual import only matters while nothing is linked.
-  $("adSource").textContent = link.dir ? t("tgAdSourceLinked", link.dir.name)
+  // A savegame scan replaces the list, so a manual import only matters while nothing is linked —
+  // or when the scan did not find the file, and then it is the one thing to do.
+  const needAd = link.dir && targetsNeed.ad ? targetsNeed.ad.need : null;
+  $("adSource").textContent = needAd === "missing" ? t("tgAdNeedMissing", link.dir.name)
+    : needAd ? t("tgAdNeedFailed")
+    : link.dir ? t("tgAdSourceLinked", link.dir.name)
     : canLinkSavegame ? t("tgAdSourceOpen") : t("tgAdSourceManual");
-  $("btnImportAdConfig").hidden = !!link.dir;
-  $("btnImportAdConfig").title = t("importAdTitle");
+  $("adPanel").classList.toggle("needs", !!needAd);
+  const adBtn = $("btnImportAdConfig");
+  adBtn.hidden = !!link.dir && !needAd;
+  adBtn.classList.toggle("primary", !!needAd);
+  adBtn.classList.toggle("ghost", !needAd);
+  adBtn.title = t("importAdTitle");
 
+  const needCp = link.dir && targetsNeed.cp ? targetsNeed.cp : null;
+  const regrant = needCp?.need === "permission";
   const linkBtn = $("btnLinkCpFolder");
   linkBtn.hidden = !canLinkSavegame;
-  linkBtn.textContent = t(courses.dir ? "relinkCpFolder" : "linkCpFolder");
-  linkBtn.title = t("linkCpFolderTitle");
-  linkBtn.classList.toggle("primary", !courses.dir); // the one thing to do while unlinked
-  linkBtn.classList.toggle("ghost", !!courses.dir);
+  linkBtn.textContent = t(regrant ? "allowAccess" : courses.dir ? "relinkCpFolder" : "linkCpFolder");
+  linkBtn.title = regrant ? "" : t("linkCpFolderTitle");
+  linkBtn.classList.toggle("primary", !courses.dir || !!needCp); // the one thing to do
+  linkBtn.classList.toggle("ghost", !!courses.dir && !needCp);
+  $("cpPanel").classList.toggle("needs", !!needCp);
   $("cpSource").textContent = !canLinkSavegame ? t("tgCpSourceManual")
+    : needCp?.need === "unlinked" ? t("tgCpNeedUnlinked")
+    : regrant ? t("tgCpNeedPermission")
+    : needCp?.need === "otherMap" ? t("tgCpNeedOtherMap", courses.mapId, needCp.mapId)
+    : needCp?.need === "failed" ? t("tgCpNeedFailed")
     : !courses.dir ? t("tgCpSourceUnlinked")
     : courses.mapId ? t("tgCpSourceMap", courses.mapId) : t("tgCpSourceLinked");
   $("btnImportCpCourses").hidden = !!courses.dir;
@@ -1934,31 +1967,42 @@ async function courseNamesForMap(coursesDir, mapId) {
   return names;
 }
 
+/* Each reader returns { names } when its list was found, or { need } naming why it was not — the
+   Targets dialog then asks the user to link or import it by hand. */
+
 /** AutoDrive keeps its network, map markers included, in the savegame folder. */
 async function readAdTargets(dir) {
   try {
     const file = await readSavegameFile(dir, "AutoDrive_config.xml");
-    return file ? adMarkerNames(await file.text()) : null;
-  } catch (e) { toast(t("toastAdScanFailed"), true); return null; }
+    return file ? { names: adMarkerNames(await file.text()) } : { need: "missing" };
+  } catch (e) { return { need: "failed" }; }
 }
 
 /** Courseplay keeps its courses outside the savegame, per map: <Courses>/<mapId>. A linked map
  *  folder only serves savegames on that map. */
 async function readCpTargets(dir) {
-  if (!courses.dir) return null;
-  if (!(await ensurePermission(courses.dir, "read"))) { toast(t("toastCpNoPermission"), true); return null; }
+  if (!courses.dir) return { need: "unlinked" };
+  if (!(await ensurePermission(courses.dir, "read"))) return { need: "permission" };
   try {
     const career = await readSavegameFile(dir, "careerSavegame.xml");
     const mapId = career && new DOMParser().parseFromString(await career.text(), "text/xml")
       .querySelector("mapId")?.textContent.trim();
-    if (!mapId) return null;
-    if (courses.mapId && courses.mapId !== mapId) {
-      toast(t("toastCpOtherMap", courses.mapId, mapId), true);
-      return null;
-    }
+    if (!mapId) return {};
+    if (courses.mapId && courses.mapId !== mapId) return { need: "otherMap", mapId };
     return { mapId, names: await courseNamesForMap(courses.dir, courses.mapId ? null : mapId) };
-  } catch (e) { toast(t("toastCpScanFailed"), true); return null; }
+  } catch (e) { return { need: "failed" }; }
 }
+
+/** Whether the editor's workflows use a system's steps (AutoDrive also drives Park/Refuel/Repair). */
+function workflowsUse(kind) {
+  const uses = kind === "cp" ? (type) => type === STEP_COURSEPLAY
+    : (type) => type === STEP_AUTODRIVE || type === STEP_PARK || type === STEP_REFUEL || type === STEP_REPAIR;
+  return state.workflows.some((w) => w.steps.some((s) => uses(s.type) || (s.support || []).some((u) => uses(u.type))));
+}
+
+// What the last scan could not find by itself, per list: { need, mapId? } or null. Shown as a
+// callout in that half of the Targets dialog, next to the button that fixes it.
+const targetsNeed = { ad: null, cp: null };
 
 /** Replaces one of the open savegame's target lists with what the mods' files hold. Names the
  *  workflows use stay in, as after an import. */
@@ -1968,15 +2012,44 @@ function replaceTargets(kind, names) {
   harvestWorkflowTargets();
 }
 
+/** Reads the open savegame's AutoDrive destinations and Courseplay courses. Whatever is not found
+ *  automatically opens the Targets dialog at that list to ask for it by hand — AutoDrive only when
+ *  the workflows use it (it is optional), Courseplay unless workflows exist and none uses it. */
 async function scanSavegameTargets() {
   const dir = link.dir;
   const ad = await readAdTargets(dir);
   const cp = await readCpTargets(dir);
   if (link.dir !== dir) return; // another savegame was opened meanwhile
-  if (ad) { replaceTargets("ad", ad); toast(t("toastAdScanned", ad.length)); }
-  if (cp) { replaceTargets("cp", cp.names); toast(t("toastCpScanned", cp.names.length, cp.mapId)); }
+  if (ad.names) { replaceTargets("ad", ad.names); toast(t("toastAdScanned", ad.names.length)); }
+  if (cp.names) { replaceTargets("cp", cp.names); toast(t("toastCpScanned", cp.names.length, cp.mapId)); }
+  targetsNeed.ad = ad.need && workflowsUse("ad") ? { need: ad.need } : null;
+  targetsNeed.cp = cp.need && (state.workflows.length === 0 || workflowsUse("cp")) ? { need: cp.need, mapId: cp.mapId } : null;
   saveState();
-  if ($("targetsModal").open) renderTargetsModal();
+  if (targetsNeed.ad || targetsNeed.cp) openTargetsModal();
+  else if ($("targetsModal").open) renderTargetsModal();
+}
+
+function openTargetsModal() {
+  const wasOpen = $("targetsModal").open;
+  if (!wasOpen) { $(TARGET_INPUT.ad).value = ""; $(TARGET_INPUT.cp).value = ""; }
+  renderTargetsModal();
+  if (!wasOpen) $("targetsModal").showModal();
+  // Straight to the button that fixes what is missing
+  const fix = targetsNeed.cp ? "btnLinkCpFolder" : targetsNeed.ad ? "btnImportAdConfig" : null;
+  if (fix && link.dir) $(fix).focus();
+}
+
+/** The Courseplay half's button: link (or change) the Courses folder, or re-grant access to it. */
+async function onCpFolderButton() {
+  if (targetsNeed.cp?.need === "permission" && courses.dir) {
+    if (await ensurePermission(courses.dir, "read")) {
+      targetsNeed.cp = null;
+      renderTargetsModal();
+      scanSavegameTargets();
+    }
+    return;
+  }
+  linkCoursesFolder();
 }
 
 /** Loads dir's workflowManager.xml into the editor, links dir and refreshes its target lists.
@@ -2008,12 +2081,76 @@ async function openSavegame() {
   openSavegameDir(dir);
 }
 
-/** Link a savegame folder — from the picker or dropped on the page. */
+/** Link a folder from the picker or dropped on the page: a savegame, or the game's user folder
+ *  (…/FarmingSimulator2025), which holds every savegame and Courseplay's courses. */
 async function openSavegameDir(dir) {
   const isSavegame = await dir.getFileHandle("careerSavegame.xml").then(() => true, () => false);
-  if (!isSavegame) toast(t("toastNotSavegame", dir.name), true);
+  if (!isSavegame) {
+    const saves = await listSavegames(dir);
+    if (saves.length > 0 || (await hasDirectory(dir, "modSettings"))) { openGameFolder(dir, saves); return; }
+    toast(t("toastNotSavegame", dir.name), true);
+  }
   // An import replaces everything and autosaves over localStorage right after — no undo.
   loadSavegame(dir, state.workflows.length > 0 ? t("confirmImportReplace", state.workflows.length) : null);
+}
+
+const hasDirectory = (dir, name) => dir.getDirectoryHandle(name).then(() => true, () => false);
+
+/** The game's savegame slots (savegame1…savegame20) that hold a game, most recently saved first.
+ *  Copies like "savegame2 - Kopie" are left out: the game never loads them. */
+async function listSavegames(gameDir) {
+  const saves = [];
+  try {
+    for await (const handle of gameDir.values()) {
+      if (handle.kind !== "directory" || !/^savegame\d+$/.test(handle.name)) continue;
+      const career = await readSavegameFile(handle, "careerSavegame.xml").catch(() => null);
+      if (!career) continue; // empty slot
+      const doc = new DOMParser().parseFromString(await career.text(), "text/xml");
+      const get = (tag) => doc.querySelector(tag)?.textContent.trim() || "";
+      saves.push({
+        dir: handle, name: get("savegameName"), map: get("mapTitle") || get("mapId"),
+        date: get("saveDate"), dateText: get("saveDateFormatted") || get("saveDate"),
+        hasWorkflows: !!(await readSavegameFile(handle).catch(() => null)),
+      });
+    }
+  } catch (e) { /* unreadable folder — whatever was listed so far */ }
+  const bySlot = new Intl.Collator(undefined, { numeric: true });
+  return saves.sort((a, b) => b.date.localeCompare(a.date) || bySlot.compare(a.dir.name, b.dir.name));
+}
+
+/** Links the Courses folder found under the game folder, then opens its one savegame or asks
+ *  which one. */
+async function openGameFolder(gameDir, saves) {
+  let cp = gameDir;
+  for (const name of ["modSettings", "FS25_Courseplay", "Courses"]) {
+    cp = cp && (await cp.getDirectoryHandle(name).catch(() => null));
+  }
+  if (cp) {
+    courses.dir = cp;
+    courses.mapId = null;
+    storeCoursesLink();
+    toast(t("toastCpFound"));
+  }
+  if (saves.length === 0) { toast(t("toastNoSavegames", gameDir.name), true); return; }
+  if (saves.length === 1) { openSavegameDir(saves[0].dir); return; }
+  renderSavegameChooser(gameDir, saves);
+  $("savegameModal").showModal();
+}
+
+function renderSavegameChooser(gameDir, saves) {
+  $("savegameScope").textContent = t("sgScope", gameDir.name);
+  $("savegameList").replaceChildren(...saves.map((sg) => {
+    const current = link.dir && link.dir.name === sg.dir.name;
+    const pick = el("button", { type: "button", class: "sg-item" },
+      el("span", { class: "sg-map" }, sg.map || sg.dir.name),
+      el("span", { class: "sg-date" }, sg.dateText),
+      el("span", { class: "sg-name" }, sg.name ? t("sgNameSlot", sg.name, sg.dir.name) : sg.dir.name),
+      el("span", { class: "sg-tags" },
+        current ? el("span", { class: "sg-tag now" }, t("sgOpenNow")) : null,
+        sg.hasWorkflows ? el("span", { class: "sg-tag" }, t("sgHasWorkflows")) : null));
+    pick.addEventListener("click", () => { $("savegameModal").close(); openSavegameDir(sg.dir); });
+    return el("li", {}, pick);
+  }));
 }
 
 /** Re-reads the linked savegame, e.g. after workflows were edited in-game or AutoDrive markers
@@ -2039,6 +2176,7 @@ async function linkCoursesFolder() {
   if (dir.name !== "Courses" && !isMapFolder) { toast(t("toastNotCoursesFolder", dir.name), true); return; }
   courses.dir = dir;
   courses.mapId = isMapFolder ? dir.name : null;
+  targetsNeed.cp = null;
   storeCoursesLink();
   renderTargetsModal();
   toast(t("toastCpLinked"));
@@ -2107,11 +2245,7 @@ function init() {
   $("btnReload").addEventListener("click", reloadSavegame);
   $("btnExport").addEventListener("click", () => (link.dir ? saveToSavegame() : downloadExport()));
 
-  $("btnTargets").addEventListener("click", () => {
-    $(TARGET_INPUT.ad).value = ""; $(TARGET_INPUT.cp).value = "";
-    renderTargetsModal();
-    $("targetsModal").showModal();
-  });
+  $("btnTargets").addEventListener("click", openTargetsModal);
 
   // Sidebar
   $("btnNewWorkflow").addEventListener("click", createWorkflow);
@@ -2211,7 +2345,7 @@ function init() {
     file.text().then((text) => {
       const n = importAdConfigXml(text);
       if (n < 0) toast(t("toastAdImportFailed"), true);
-      else { toast(t("toastAdImported", n)); saveState(); renderTargetsModal(); }
+      else { toast(t("toastAdImported", n)); targetsNeed.ad = null; saveState(); renderTargetsModal(); }
     });
   });
   $("btnImportCpCourses").addEventListener("click", () => $("fileCpCourses").click());
@@ -2220,11 +2354,12 @@ function init() {
     e.target.value = "";
     importCpCourseFiles(files).then((n) => {
       toast(t("toastCpImported", n));
+      if (n > 0) targetsNeed.cp = null;
       saveState();
       renderTargetsModal();
     });
   });
-  $("btnLinkCpFolder").addEventListener("click", linkCoursesFolder);
+  $("btnLinkCpFolder").addEventListener("click", onCpFolderButton);
 
   // Confirm modal
   $("confirmOk").addEventListener("click", () => {

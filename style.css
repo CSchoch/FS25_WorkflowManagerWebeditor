@@ -142,7 +142,7 @@ input, select { font: inherit; color: inherit; }
 .layout { flex: 1; display: flex; min-height: 0; }
 
 .sidebar {
-  width: 280px; flex: none; display: flex; flex-direction: column;
+  width: 336px; flex: none; display: flex; flex-direction: column;
   background: var(--bg); border-right: 1px solid var(--border);
   min-height: 0;
 }
@@ -164,39 +164,30 @@ input, select { font: inherit; color: inherit; }
 .wf-item + .wf-item { margin-top: 1px; }
 .wf-item:hover { background: color-mix(in srgb, var(--text) 5%, transparent); }
 /* Selected: the document's own surface, marked by an ink bar — not the accent green, which
-   reads as Courseplay next to the strips */
+   reads as Courseplay on this page */
 .wf-item.active { background: var(--bg-panel); box-shadow: 0 0 0 1px var(--border); }
 .wf-item.active::before {
   content: ""; position: absolute; left: 0; top: 9px; bottom: 9px; width: 3px; border-radius: 2px; background: var(--text);
 }
 .wf-item-main {
-  --gap-c: var(--bg);
-  flex: 1; min-width: 0; display: grid; grid-template-columns: 1fr auto; align-items: baseline; column-gap: 10px; row-gap: 7px;
-  padding: 8px 10px 10px 13px; border: none; background: none; font: inherit; color: inherit;
-  text-align: left; cursor: pointer; border-radius: var(--radius-sm);
+  flex: 1; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; column-gap: 10px;
+  padding: 8px 6px 8px 13px; border: none; border-radius: var(--radius-sm);
+  background: none; font: inherit; color: inherit; text-align: left; cursor: pointer;
 }
-.wf-item.active .wf-item-main { --gap-c: var(--bg-panel); }
 .wf-item-main:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .wf-item-name { font-weight: 550; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .wf-item.active .wf-item-name { font-weight: 650; }
-.wf-item-count { font-size: 12px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
-/* One tick per main step; ticks shrink when a workflow is longer than the row is wide */
-.wf-strip { grid-column: 1 / -1; display: flex; height: 4px; min-width: 0; overflow: hidden; }
-.wf-strip > span { flex: 0 1 3px; min-width: 0; box-shadow: inset -1px 0 0 var(--gap-c); background: var(--ad); }
-.wf-strip > .cp { background: var(--cp); }
-.wf-strip > .marker { background: var(--marker); }
-.wf-strip > .auto { background: color-mix(in srgb, var(--ad) 40%, var(--gap-c)); }
-.wf-item-actions { display: flex; gap: 0; padding: 5px 4px 0 0; opacity: 0; }
-.wf-item:hover .wf-item-actions, .wf-item:focus-within .wf-item-actions { opacity: 1; }
-@media (hover: none) { .wf-item-actions { opacity: 1; } }
+.wf-item-count { font-size: 12.5px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+/* Always visible: these are the only duplicate/delete controls for a workflow */
+.wf-item-actions { flex: none; display: flex; padding: 4px 4px 0 0; }
 .wf-item-actions .mini {
-  width: 26px; height: 26px; border: none; background: transparent; border-radius: 6px;
-  cursor: pointer; color: var(--text-dim); display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 28px; border: none; background: transparent; border-radius: 6px;
+  cursor: pointer; color: var(--text-faint); display: inline-flex; align-items: center; justify-content: center;
 }
 .wf-item-actions .mini:hover { background: var(--bg-inset); color: var(--text); }
 .wf-item-actions .mini.danger:hover { color: var(--danger); background: var(--danger-soft); }
 .wf-item-actions .mini:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-.wf-item-actions .mini svg { width: 14px; height: 14px; }
+.wf-item-actions .mini svg { width: 15px; height: 15px; }
 .wf-list-empty { padding: 22px 14px; color: var(--text-faint); font-size: 13px; text-align: center; }
 .sidebar-foot { padding: 8px 16px; border-top: 1px solid var(--border); color: var(--text-faint); font-size: 12px; }
 
@@ -209,10 +200,10 @@ input, select { font: inherit; color: inherit; }
 .empty-hero {
   max-width: 720px; margin: 12vh auto 0; display: flex; align-items: center; gap: clamp(28px, 6vw, 64px);
 }
-.empty-copy { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; min-width: 0; }
-.empty-hero h2 { margin: 0; font: 650 26px/1.2 var(--font-display); letter-spacing: -0.01em; max-width: 20ch; text-wrap: balance; }
+.empty-copy { flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; min-width: 0; }
+.empty-hero h2 { margin: 0; font: 650 26px/1.2 var(--font-display); letter-spacing: -0.01em; text-wrap: balance; }
 .empty-hero p { margin: 0; color: var(--text-dim); max-width: 52ch; }
-.empty-actions { display: flex; gap: 10px; margin-top: 8px; }
+.empty-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
 .route-sample { --spine: 7px; list-style: none; margin: 0; padding: 0; flex: none; position: relative; }
 .route-sample::before {
   content: ""; position: absolute; left: calc(var(--spine) - 1px); top: 12px; bottom: 12px; width: 2px; background: var(--border-strong);
@@ -242,7 +233,6 @@ input, select { font: inherit; color: inherit; }
 }
 .wf-name-input:hover { border-color: var(--border); }
 .wf-name-input:focus { border-color: var(--accent); background: var(--bg-inset); }
-.wf-head-actions { display: flex; gap: 6px; }
 .wf-meta { margin: 4px 0 0; color: var(--text-dim); font-size: 13px; display: flex; gap: 6px 18px; flex-wrap: wrap; }
 .wf-id { color: var(--text-faint); font-variant-numeric: tabular-nums; }
 
@@ -351,14 +341,14 @@ input, select { font: inherit; color: inherit; }
   border: 1px solid var(--border-strong); padding: 0 8px; border-radius: 999px; font-size: 12px; line-height: 19px; color: var(--text-dim);
 }
 
-/* Sync gate: a dashed line across the route, the label sitting on it */
+/* Sync gate: the label, then a dashed line to the row's buttons. Drawn inside the summary
+   button so it stops where the actions start instead of running under them. */
 .step-row.gate { min-height: 34px; }
-.step-row.gate::after {
-  content: ""; position: absolute; left: calc(var(--spine) + 12px); right: 10px; top: 50%; height: 0;
-  border-top: 2px dashed color-mix(in srgb, var(--marker) 55%, transparent);
+.gate .step-open { flex-wrap: nowrap; align-items: center; gap: 12px; padding-top: 6px; padding-bottom: 6px; }
+.gate .step-open::after {
+  content: ""; flex: 1; min-width: 24px; border-top: 2px dashed color-mix(in srgb, var(--marker) 55%, transparent);
 }
-.gate .step-open { padding-top: 6px; padding-bottom: 6px; }
-.gate .step-job { width: auto; padding: 0 8px; margin-left: -4px; background: var(--row-bg); color: var(--marker); }
+.gate .step-job { width: auto; color: var(--marker); }
 
 .step-actions { display: flex; gap: 0; align-items: center; opacity: 0; }
 .step-row:hover .step-actions, .step-row:focus-within .step-actions { opacity: 1; }
@@ -401,7 +391,11 @@ input, select { font: inherit; color: inherit; }
 /* ---------- Modal ---------- */
 .modal { border: none; padding: 0; background: transparent; max-width: min(560px, calc(100vw - 32px)); width: 100%; }
 .modal.wide { max-width: min(760px, calc(100vw - 32px)); }
-.modal.small { max-width: 380px; }
+.modal.small { max-width: 420px; }
+/* Confirm: one sentence and its two answers — no divider between them */
+.modal.small .modal-body { padding: 22px 22px 4px; font-size: 15px; line-height: 1.5; }
+.modal.small .modal-body p { margin: 0; }
+.modal.small .modal-foot { border-top: none; padding: 16px 22px 20px; }
 .modal::backdrop { background: rgba(10, 14, 8, 0.55); backdrop-filter: blur(2px); }
 .modal-inner {
   background: var(--bg-panel); color: var(--text);
@@ -737,9 +731,8 @@ input, select { font: inherit; color: inherit; }
   .search-wrap { flex: 1; min-width: 0; }
   .sidebar-head .btn.block { width: auto; }
   .wf-list { flex: none; display: flex; gap: 6px; overflow-x: auto; overflow-y: hidden; padding: 4px 12px 10px; }
-  .wf-item { flex: none; width: 200px; }
+  .wf-item { flex: none; width: 250px; }
   .wf-item + .wf-item { margin-top: 0; }
-  .wf-item-actions { display: none; }
   .sidebar-foot { display: none; }
   .topbar { flex-wrap: wrap; padding: 10px 16px; }
   .topbar-actions { flex-wrap: wrap; gap: 6px; }
@@ -764,8 +757,7 @@ input, select { font: inherit; color: inherit; }
   .step-job, .support-row .step-job { width: auto; }
   .step-where { flex: none; width: 100%; }
   .step-actions { grid-column: 3; padding: 0 0 4px 6px; opacity: 1; }
-  /* The gate line runs through the label's line, not the middle of label + actions */
-  .step-row.gate::after { top: 18px; left: calc(var(--spine) + 10px); }
+  .gate .step-open { flex-direction: row; padding-bottom: 6px; }
   .support-row { grid-template-columns: 40px 14px 22px minmax(0, 1fr); }
   .support-row .node { grid-column: 3; }
   .support-row .step-actions { grid-column: 4; }

@@ -89,12 +89,17 @@ try {
       </ol>
       <div class="empty-copy">
         <h2 data-i18n="emptyTitle">Plan your farm's day — before you even start the game</h2>
-        <p data-i18n-html="emptyText">Create AutoDrive &amp; Courseplay workflows here, then export <code>workflowManager.xml</code> into your savegame folder.</p>
+        <p id="emptyText" data-i18n-html="emptyText">Create AutoDrive &amp; Courseplay workflows here, then export <code>workflowManager.xml</code> into your savegame folder.</p>
         <div class="empty-actions">
+          <!-- primary when the browser can link a savegame folder; hidden otherwise (see applyI18nStatic) -->
+          <button class="btn primary" id="btnEmptyOpenSavegame" hidden>
+            <svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+            <span data-i18n="openSavegameBtn">Open savegame</span>
+          </button>
           <button class="btn primary" id="btnEmptyNew" data-i18n="newWorkflow">New workflow</button>
           <button class="btn ghost" id="btnEmptyImport" data-i18n="importBtn">Import XML</button>
         </div>
-        <p class="hint" data-i18n="emptyHint">Tip: you can also drop a workflowManager.xml file anywhere on this page.</p>
+        <p class="hint" id="emptyHint" data-i18n="emptyHint">Tip: you can also drop a workflowManager.xml file anywhere on this page.</p>
       </div>
     </div>
 
@@ -102,16 +107,6 @@ try {
       <div class="wf-head">
         <div class="wf-name-row">
           <input type="text" id="wfName" class="wf-name-input" maxlength="60" data-i18n-ph="namePlaceholder" placeholder="Workflow name">
-          <div class="wf-head-actions">
-            <button class="btn ghost" id="btnDuplicateWf" title="">
-              <svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-              <span data-i18n="duplicate">Duplicate</span>
-            </button>
-            <button class="btn danger-ghost" id="btnDeleteWf">
-              <svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m3 0-1 13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7m4 4v6m4-6v6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-              <span data-i18n="delete">Delete</span>
-            </button>
-          </div>
         </div>
         <p class="wf-meta" id="wfMeta"></p>
       </div>
@@ -319,7 +314,7 @@ try {
 </dialog>
 
 <div class="toast-wrap" id="toastWrap"></div>
-<div class="drop-overlay" id="dropOverlay"><div data-i18n="dropHere">Drop workflowManager.xml to import</div></div>
+<div class="drop-overlay" id="dropOverlay"><div id="dropText" data-i18n="dropHere">Drop workflowManager.xml to import</div></div>
 
 <input type="file" id="fileImport" accept=".xml,text/xml" hidden>
 <input type="file" id="fileAdConfig" accept=".xml,text/xml" hidden>

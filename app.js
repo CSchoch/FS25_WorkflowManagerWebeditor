@@ -45,6 +45,7 @@ const I18N = {
     searchPlaceholder: "Search workflows…", newWorkflow: "New workflow",
     emptyTitle: "Plan your farm's day — before you even start the game",
     emptyText: "Create AutoDrive &amp; Courseplay workflows here, then export <code>workflowManager.xml</code> into your savegame folder.",
+    emptyTextOpen: "Open a savegame folder to edit its workflows in place, or start a new AutoDrive &amp; Courseplay workflow here.",
     emptyHint: "Tip: you can also drop a workflowManager.xml file anywhere on this page.",
     namePlaceholder: "Workflow name", duplicate: "Duplicate", delete: "Delete", cancel: "Cancel",
     save: "Save", add: "Add", done: "Done", replace: "Replace",
@@ -109,14 +110,13 @@ const I18N = {
     noMatches: "No matches — free text is kept as-is",
     targetHintAd: "AutoDrive destination as the game lists it (group/marker name). Manage suggestions under “Targets”.",
     targetHintCp: "Courseplay course name (with folder prefix if used). Manage suggestions under “Targets”.",
-    confirmDeleteWf: (n) => `Delete workflow “${n}”?`,
+    confirmDeleteWf: (n, steps) => steps ? `Delete workflow “${n}” and its ${steps} step${steps === 1 ? "" : "s"}?` : `Delete workflow “${n}”?`,
     confirmDeleteStep: "Delete this step (including its support steps)?",
     confirmDeleteSupport: "Delete this support step?",
     confirmImportReplace: (n) => `Replace the ${n} workflow(s) in this editor with the imported file? Unexported changes are lost.`,
     copySuffix: "(Copy)", newWfName: "New Workflow", unnamed: "Unnamed",
     stepCount: (n) => `${n} step${n === 1 ? "" : "s"}`,
     wfCount: (n) => `${n} workflow${n === 1 ? "" : "s"}`,
-    supportCount: (n) => `${n} support`,
     toastImported: (n) => `Imported ${n} workflow(s)`,
     toastImportFailed: "Import failed: not a valid workflowManager.xml",
     toastExported: "workflowManager.xml downloaded — place it in your savegame folder",
@@ -131,6 +131,8 @@ const I18N = {
     metaId: "ID", supportStepCount: (n) => `${n} support step${n === 1 ? "" : "s"}`,
     moveUp: "Move up", moveDown: "Move down", edit: "Edit", langName: "EN",
     dropHere: "Drop workflowManager.xml to import",
+    dropHereFolder: "Drop a savegame folder to open it, or workflowManager.xml to import",
+    emptyHintFolder: "Tip: you can also drop a savegame folder or a workflowManager.xml file anywhere on this page.",
     openSavegameBtn: "Open savegame",
     openSavegameTitle: "Pick your savegame folder (…/FarmingSimulator2025/savegameN): its workflowManager.xml is loaded and Save writes straight back into it.",
     saveToBtn: (d) => `Save to ${d}`,
@@ -160,6 +162,7 @@ const I18N = {
     searchPlaceholder: "Workflows suchen…", newWorkflow: "Neuer Workflow",
     emptyTitle: "Plane den Hoftag — noch bevor das Spiel startet",
     emptyText: "Erstelle hier AutoDrive- &amp; Courseplay-Workflows und exportiere <code>workflowManager.xml</code> in deinen Spielstand-Ordner.",
+    emptyTextOpen: "Öffne einen Spielstand-Ordner, um seine Workflows direkt zu bearbeiten, oder lege hier einen neuen AutoDrive- &amp; Courseplay-Workflow an.",
     emptyHint: "Tipp: Du kannst eine workflowManager.xml auch einfach auf diese Seite ziehen.",
     namePlaceholder: "Workflow-Name", duplicate: "Duplizieren", delete: "Löschen", cancel: "Abbrechen",
     save: "Speichern", add: "Hinzufügen", done: "Fertig", replace: "Ersetzen",
@@ -224,14 +227,13 @@ const I18N = {
     noMatches: "Keine Treffer — Freitext wird übernommen",
     targetHintAd: "AutoDrive-Ziel wie im Spiel gelistet (Gruppe/Markername). Vorschläge unter „Ziele“ verwalten.",
     targetHintCp: "Courseplay-Kursname (ggf. mit Ordner-Präfix). Vorschläge unter „Ziele“ verwalten.",
-    confirmDeleteWf: (n) => `Workflow „${n}“ löschen?`,
+    confirmDeleteWf: (n, steps) => steps ? `Workflow „${n}“ mit ${steps} Schritt${steps === 1 ? "" : "en"} löschen?` : `Workflow „${n}“ löschen?`,
     confirmDeleteStep: "Diesen Schritt (inkl. Unterstützungsschritte) löschen?",
     confirmDeleteSupport: "Diesen Unterstützungsschritt löschen?",
     confirmImportReplace: (n) => `Die ${n} Workflow(s) im Editor durch die importierte Datei ersetzen? Nicht exportierte Änderungen gehen verloren.`,
     copySuffix: "(Kopie)", newWfName: "Neuer Workflow", unnamed: "Unbenannt",
     stepCount: (n) => `${n} Schritt${n === 1 ? "" : "e"}`,
     wfCount: (n) => `${n} Workflow${n === 1 ? "" : "s"}`,
-    supportCount: (n) => `${n} Support`,
     toastImported: (n) => `${n} Workflow(s) importiert`,
     toastImportFailed: "Import fehlgeschlagen: keine gültige workflowManager.xml",
     toastExported: "workflowManager.xml heruntergeladen — in den Spielstand-Ordner legen",
@@ -246,6 +248,8 @@ const I18N = {
     metaId: "ID", supportStepCount: (n) => `${n} Unterstützungsschritt${n === 1 ? "" : "e"}`,
     moveUp: "Nach oben", moveDown: "Nach unten", edit: "Bearbeiten", langName: "DE",
     dropHere: "workflowManager.xml zum Importieren ablegen",
+    dropHereFolder: "Spielstand-Ordner zum Öffnen ablegen, oder workflowManager.xml zum Importieren",
+    emptyHintFolder: "Tipp: Du kannst auch einen Spielstand-Ordner oder eine workflowManager.xml irgendwo auf dieser Seite ablegen.",
     openSavegameBtn: "Spielstand öffnen",
     openSavegameTitle: "Wähle deinen Spielstand-Ordner (…/FarmingSimulator2025/savegameN): seine workflowManager.xml wird geladen und Speichern schreibt direkt dorthin zurück.",
     saveToBtn: (d) => `In ${d} speichern`,
@@ -860,6 +864,10 @@ function askConfirm(text, onOk, okKey = "delete") {
 
 function applyI18nStatic() {
   document.documentElement.lang = state.lang;
+  // Welcome text names the main button: open a savegame where the browser can, else export
+  $("emptyText").dataset.i18nHtml = canLinkSavegame ? "emptyTextOpen" : "emptyText";
+  $("emptyHint").dataset.i18n = canLinkSavegame ? "emptyHintFolder" : "emptyHint";
+  $("dropText").dataset.i18n = canLinkSavegame ? "dropHereFolder" : "dropHere";
   for (const node of document.querySelectorAll("[data-i18n]")) {
     node.textContent = t(node.dataset.i18n);
   }
@@ -882,6 +890,10 @@ function applyI18nStatic() {
   $("btnQuickRepair").title = t("typeRepair");
   $("btnOpenSavegame").hidden = !canLinkSavegame;
   $("btnOpenSavegame").title = t("openSavegameTitle");
+  $("btnEmptyOpenSavegame").hidden = !canLinkSavegame;
+  $("btnEmptyOpenSavegame").title = t("openSavegameTitle");
+  $("btnEmptyNew").classList.toggle("primary", !canLinkSavegame);
+  $("btnEmptyNew").classList.toggle("ghost", canLinkSavegame);
   $("btnReload").hidden = !link.dir;
   $("btnReload").title = link.dir ? t("reloadTitle", link.dir.name) : "";
   $("exportLabel").textContent = link.dir ? t("saveToBtn", link.dir.name) : t("exportBtn");
@@ -915,20 +927,14 @@ function renderSidebar() {
     list.append(el("div", { class: "wf-list-empty" }, t("noEntries")));
   }
   for (const wf of filtered) {
-    const supportCount = wf.steps.reduce((n, s) => n + (s.support ? s.support.length : 0), 0);
-    const sub = t("stepCount", wf.steps.length) + (supportCount ? `, ${t("supportStepCount", supportCount)}` : "");
     const active = wf.id === state.selectedId;
-    // The route in miniature: one tick per main step in its system's colour, so workflows
-    // with similar names still look different (grass vs. arable vs. a 1-step transport).
-    const strip = el("span", { class: "wf-strip", "aria-hidden": "true" });
-    for (const s of wf.steps) strip.append(el("span", { class: typeBadgeClass(s.type) }));
     // The row is a plain element wrapping one selectable button — nesting the duplicate/delete
     // buttons inside a <button> row would be invalid HTML and unreachable for screen readers.
-    const select = el("button", { type: "button", class: "wf-item-main", title: sub, "aria-current": active ? "true" : null },
+    const select = el("button", { type: "button", class: "wf-item-main", "aria-current": active ? "true" : null },
       el("span", { class: "wf-item-name" }, wf.name || t("unnamed")),
-      el("span", { class: "wf-item-count", "aria-hidden": "true" }, String(wf.steps.length)),
-      el("span", { class: "sr" }, sub),
-      strip);
+      el("span", { class: "wf-item-count", title: t("stepCount", wf.steps.length) },
+        el("span", { "aria-hidden": "true" }, String(wf.steps.length)),
+        el("span", { class: "sr" }, t("stepCount", wf.steps.length))));
     select.addEventListener("click", () => { state.selectedId = wf.id; commit(); });
     const item = el("div", { class: `wf-item${active ? " active" : ""}` },
       select,
@@ -1195,7 +1201,7 @@ function duplicateWorkflow(id) {
 function requestDeleteWorkflow(id) {
   const wf = state.workflows.find((w) => w.id === id);
   if (!wf) return;
-  askConfirm(t("confirmDeleteWf", wf.name || t("unnamed")), () => {
+  askConfirm(t("confirmDeleteWf", wf.name || t("unnamed"), wf.steps.length), () => {
     const idx = state.workflows.indexOf(wf);
     state.workflows.splice(idx, 1);
     if (state.selectedId === id) {
@@ -1999,6 +2005,11 @@ async function openSavegame() {
   try {
     dir = await window.showDirectoryPicker({ mode: "readwrite", startIn: link.dir || "documents" });
   } catch (e) { return; } // picker cancelled
+  openSavegameDir(dir);
+}
+
+/** Link a savegame folder — from the picker or dropped on the page. */
+async function openSavegameDir(dir) {
   const isSavegame = await dir.getFileHandle("careerSavegame.xml").then(() => true, () => false);
   if (!isSavegame) toast(t("toastNotSavegame", dir.name), true);
   // An import replaces everything and autosaves over localStorage right after — no undo.
@@ -2092,6 +2103,7 @@ function init() {
     e.target.value = "";
   });
   $("btnOpenSavegame").addEventListener("click", openSavegame);
+  $("btnEmptyOpenSavegame").addEventListener("click", openSavegame);
   $("btnReload").addEventListener("click", reloadSavegame);
   $("btnExport").addEventListener("click", () => (link.dir ? saveToSavegame() : downloadExport()));
 
@@ -2111,8 +2123,6 @@ function init() {
     const wf = selectedWorkflow();
     if (wf) { wf.name = $("wfName").value; saveState(); renderSidebar(); }
   });
-  $("btnDuplicateWf").addEventListener("click", () => { if (state.selectedId) duplicateWorkflow(state.selectedId); });
-  $("btnDeleteWf").addEventListener("click", () => { if (state.selectedId) requestDeleteWorkflow(state.selectedId); });
 
   // AD settings (stored like the game: fill levels as 0..1, pipe offset in meters)
   const bindAd = (inputId, key, scale) => {
@@ -2248,7 +2258,19 @@ function init() {
     dragDepth = 0;
     $("dropOverlay").classList.remove("active");
     const file = [...e.dataTransfer.files].find((f) => /\.xml$/i.test(f.name));
-    if (file) { e.preventDefault(); handleWorkflowFile(file); }
+    // Chrome/Edge hand a dropped folder over as a handle, like the Open savegame picker does.
+    // getAsFileSystemHandle must be called during the event, before anything is awaited.
+    const items = canLinkSavegame
+      ? [...e.dataTransfer.items].filter((i) => i.kind === "file" && typeof i.getAsFileSystemHandle === "function")
+      : [];
+    if (!file && items.length === 0) return;
+    e.preventDefault();
+    if (items.length === 0) { handleWorkflowFile(file); return; }
+    Promise.all(items.map((i) => i.getAsFileSystemHandle())).then((handles) => {
+      const dir = handles.find((h) => h && h.kind === "directory");
+      if (dir) openSavegameDir(dir);
+      else if (file) handleWorkflowFile(file);
+    });
   });
 
   render();

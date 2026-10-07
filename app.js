@@ -93,7 +93,16 @@ const I18N = {
     tgNoMatch: (q) => `No match. Press Enter to add “${q}”.`,
     tgAdEmpty: "No destinations yet.", tgCpEmpty: "No courses yet.",
     tgAdNoGroup: "No group", tgCpNoGroup: "No folder",
-    tgRemove: (n) => `Remove ${n}`,
+    tgRemove: (n) => `Remove ${n}`, remove: "Remove",
+    tgRemoveGroupAd: (g) => `Remove group ${g} and its destinations`,
+    tgRemoveGroupCp: (g) => `Remove folder ${g} and its courses`,
+    confirmRemoveGroupAd: (g, n) => `Remove group “${g}” and its ${n} destinations?`,
+    confirmRemoveGroupCp: (g, n) => `Remove folder “${g}” and its ${n} courses?`,
+    tgClear: "Clear", tgClearTitle: "Remove every entry listed below",
+    confirmClearAd: (n) => `Remove all ${n} destinations from this list?`,
+    confirmClearCp: (n) => `Remove all ${n} courses from this list?`,
+    confirmClearFiltered: (n, q) => `Remove the ${n} entries matching “${q}”?`,
+    tgComesBack: " Open savegame and Reload read them in again.",
     noEntries: "No entries yet",
     noMatches: "No matches — free text is kept as-is",
     targetHintAd: "AutoDrive destination as the game lists it (group/marker name). Manage suggestions under “Targets”.",
@@ -197,7 +206,16 @@ const I18N = {
     tgNoMatch: (q) => `Kein Treffer. Enter fügt „${q}“ hinzu.`,
     tgAdEmpty: "Noch keine Ziele.", tgCpEmpty: "Noch keine Kurse.",
     tgAdNoGroup: "Ohne Gruppe", tgCpNoGroup: "Ohne Ordner",
-    tgRemove: (n) => `${n} entfernen`,
+    tgRemove: (n) => `${n} entfernen`, remove: "Entfernen",
+    tgRemoveGroupAd: (g) => `Gruppe ${g} mit ihren Zielen entfernen`,
+    tgRemoveGroupCp: (g) => `Ordner ${g} mit seinen Kursen entfernen`,
+    confirmRemoveGroupAd: (g, n) => `Gruppe „${g}“ mit ihren ${n} Zielen entfernen?`,
+    confirmRemoveGroupCp: (g, n) => `Ordner „${g}“ mit seinen ${n} Kursen entfernen?`,
+    tgClear: "Leeren", tgClearTitle: "Alle unten gelisteten Einträge entfernen",
+    confirmClearAd: (n) => `Alle ${n} Ziele aus dieser Liste entfernen?`,
+    confirmClearCp: (n) => `Alle ${n} Kurse aus dieser Liste entfernen?`,
+    confirmClearFiltered: (n, q) => `Die ${n} Einträge entfernen, die „${q}“ enthalten?`,
+    tgComesBack: " „Spielstand öffnen“ und „Neu laden“ lesen sie wieder ein.",
     noEntries: "Noch keine Einträge",
     noMatches: "Keine Treffer — Freitext wird übernommen",
     targetHintAd: "AutoDrive-Ziel wie im Spiel gelistet (Gruppe/Markername). Vorschläge unter „Ziele“ verwalten.",
@@ -1525,6 +1543,23 @@ function targetGroup(kind, name) {
 }
 
 /** One list, filtered by its input and grouped like the game groups it. */
+// Folded groups per list, for this page visit. While filtering, every match is shown anyway.
+const collapsedGroups = { ad: new Set(), cp: new Set() };
+
+function removeTargets(kind, names) {
+  const drop = new Set(names);
+  state.targets[kind] = state.targets[kind].filter((n) => !drop.has(n));
+  saveState();
+  renderTargetList(kind);
+}
+
+/** Confirms removing several entries; names that a scan or the workflows bring back say so. */
+function confirmRemoveTargets(kind, names, text) {
+  if (names.length === 1) { removeTargets(kind, names); return; }
+  const refilled = kind === "ad" ? !!link.dir : !!(link.dir && courses.dir);
+  askConfirm(text + (refilled ? t("tgComesBack") : ""), () => removeTargets(kind, names), "remove");
+}
+
 function renderTargetList(kind) {
   const ul = $(`${kind}TargetItems`);
   const query = $(TARGET_INPUT[kind]).value.trim();
@@ -1533,10 +1568,18 @@ function renderTargetList(kind) {
   const shown = all.filter((n) => !q || n.toLowerCase().includes(q));
   $(`${kind}Count`).textContent = q ? t("tgCountFiltered", shown.length, all.length) : String(all.length);
   $(TARGET_ADD[kind]).disabled = !query || all.includes(query);
+  // Clear removes what is listed: everything, or only the matches while filtering.
+  const clear = $(`${kind}Clear`);
+  clear.hidden = shown.length === 0;
+  clear.title = t("tgClearTitle");
+  clear.onclick = () => confirmRemoveTargets(kind, shown, q ? t("confirmClearFiltered", shown.length, query)
+    : t(kind === "ad" ? "confirmClearAd" : "confirmClearCp", shown.length));
 
-  // Removing re-renders the list; keep keyboard focus on the row that took the removed one's place.
-  const removes = [...ul.querySelectorAll(".tg-remove")];
-  const focusIndex = removes.indexOf(document.activeElement);
+  // Re-rendering replaces every button; keep keyboard focus where it was — on the same group's
+  // toggle, or on the remove button that took the removed row's place.
+  const active = ul.contains(document.activeElement) ? document.activeElement : null;
+  const focusGroup = active?.classList.contains("tg-toggle") ? active.dataset.group : null;
+  const focusIndex = active ? [...ul.querySelectorAll(".tg-remove")].indexOf(active) : -1;
   ul.replaceChildren();
   if (shown.length === 0) {
     ul.append(el("li", { class: "none" }, q ? t("tgNoMatch", query) : t(kind === "ad" ? "tgAdEmpty" : "tgCpEmpty")));
@@ -1554,9 +1597,23 @@ function renderTargetList(kind) {
   const groups = [...byGroup.keys()].sort((a, b) => (a ? 1 : 0) - (b ? 1 : 0) || coll.compare(a, b));
   for (const group of groups) {
     const items = byGroup.get(group).sort((a, b) => coll.compare(a.leaf, b.leaf));
-    ul.append(el("li", { class: "tg-group" },
-      el("span", {}, group || t(kind === "ad" ? "tgAdNoGroup" : "tgCpNoGroup")),
-      el("span", { class: "tg-group-n" }, String(items.length))));
+    const label = group || t(kind === "ad" ? "tgAdNoGroup" : "tgCpNoGroup");
+    const collapsed = !q && collapsedGroups[kind].has(group);
+    const toggle = el("button", { type: "button", class: "tg-toggle", "data-group": group, "aria-expanded": String(!collapsed), disabled: !!q },
+      el("span", { class: "tg-chev", "aria-hidden": "true" }),
+      el("span", { class: "tg-group-name" }, label),
+      el("span", { class: "tg-group-n" }, String(items.length)));
+    toggle.addEventListener("click", () => {
+      const set = collapsedGroups[kind];
+      if (set.has(group)) set.delete(group); else set.add(group);
+      renderTargetList(kind);
+    });
+    const removeLabel = t(kind === "ad" ? "tgRemoveGroupAd" : "tgRemoveGroupCp", label);
+    const rmGroup = el("button", { type: "button", class: "tg-remove", "aria-label": removeLabel, title: removeLabel }, "✕");
+    rmGroup.addEventListener("click", () => confirmRemoveTargets(kind, items.map((i) => i.name),
+      t(kind === "ad" ? "confirmRemoveGroupAd" : "confirmRemoveGroupCp", label, items.length)));
+    ul.append(el("li", { class: `tg-group${collapsed ? " collapsed" : ""}` }, toggle, rmGroup));
+    if (collapsed) continue;
     for (const { name, leaf } of items) {
       const rm = el("button", { type: "button", class: "tg-remove", "aria-label": t("tgRemove", name), title: t("tgRemove", name) }, "✕");
       rm.addEventListener("click", () => {
@@ -1567,7 +1624,9 @@ function renderTargetList(kind) {
       ul.append(el("li", { class: "tg-item" }, el("span", { title: name }, leaf), rm));
     }
   }
-  if (focusIndex >= 0) {
+  if (focusGroup != null) {
+    ul.querySelector(`.tg-toggle[data-group="${CSS.escape(focusGroup)}"]`)?.focus();
+  } else if (focusIndex >= 0) {
     const next = ul.querySelectorAll(".tg-remove");
     (next[focusIndex] || next[next.length - 1])?.focus();
   }

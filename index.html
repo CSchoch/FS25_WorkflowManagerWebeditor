@@ -80,21 +80,26 @@ try {
   <main class="editor">
 
     <div class="empty-hero" id="editorEmpty">
-      <svg viewBox="0 0 32 32" aria-hidden="true">
-        <rect width="32" height="32" rx="7" fill="var(--accent)" opacity=".15"/>
-        <path d="M8 10h16M8 16h16M8 22h10" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
-      </svg>
-      <h2 data-i18n="emptyTitle">Plan your farm's day — before you even start the game</h2>
-      <p data-i18n-html="emptyText">Create AutoDrive &amp; Courseplay workflows here, then export <code>workflowManager.xml</code> into your savegame folder.</p>
-      <div class="empty-actions">
-        <button class="btn primary" id="btnEmptyNew" data-i18n="newWorkflow">New workflow</button>
-        <button class="btn ghost" id="btnEmptyImport" data-i18n="importBtn">Import XML</button>
+      <!-- What a workflow is, drawn with the same route device as the step list -->
+      <ol class="route-sample" aria-hidden="true">
+        <li class="rs-stop ad"><span data-i18n-action="drive">Drive To</span></li>
+        <li class="rs-stop cp"><span data-i18n-action="fieldwork">Field Work</span></li>
+        <li class="rs-gate"><span data-i18n="typeUnlock">Unlock Follower</span></li>
+        <li class="rs-stop auto"><span data-i18n="typePark">Park</span></li>
+      </ol>
+      <div class="empty-copy">
+        <h2 data-i18n="emptyTitle">Plan your farm's day — before you even start the game</h2>
+        <p data-i18n-html="emptyText">Create AutoDrive &amp; Courseplay workflows here, then export <code>workflowManager.xml</code> into your savegame folder.</p>
+        <div class="empty-actions">
+          <button class="btn primary" id="btnEmptyNew" data-i18n="newWorkflow">New workflow</button>
+          <button class="btn ghost" id="btnEmptyImport" data-i18n="importBtn">Import XML</button>
+        </div>
+        <p class="hint" data-i18n="emptyHint">Tip: you can also drop a workflowManager.xml file anywhere on this page.</p>
       </div>
-      <p class="hint" data-i18n="emptyHint">Tip: you can also drop a workflowManager.xml file anywhere on this page.</p>
     </div>
 
-    <div id="editorView" hidden>
-      <div class="card wf-head-card">
+    <div class="wf-doc" id="editorView" hidden>
+      <div class="wf-head">
         <div class="wf-name-row">
           <input type="text" id="wfName" class="wf-name-input" maxlength="60" data-i18n-ph="namePlaceholder" placeholder="Workflow name">
           <div class="wf-head-actions">
@@ -108,10 +113,10 @@ try {
             </button>
           </div>
         </div>
-        <div class="wf-meta" id="wfMeta"></div>
+        <p class="wf-meta" id="wfMeta"></p>
       </div>
 
-      <details class="card settings-card" id="adSettingsCard">
+      <details class="settings-card" id="adSettingsCard">
         <summary>
           <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
           <span data-i18n="adSettingsTitle">AD / CP Settings</span>
@@ -136,19 +141,24 @@ try {
         </div>
       </details>
 
-      <section class="card steps-card">
+      <section class="steps-card" aria-labelledby="stepsTitle">
+        <!-- Sticky: in a 76-step workflow the add buttons must not scroll away -->
         <div class="steps-head">
-          <h3 data-i18n="steps">Steps</h3>
+          <h3 id="stepsTitle" data-i18n="steps">Steps</h3>
           <div class="steps-toolbar">
             <button class="btn primary sm" id="btnAddStep">
               <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
               <span data-i18n="addStep">Add step</span>
             </button>
-            <button class="btn chip-btn marker sm" id="btnQuickWait" title="" data-i18n="typeWait">Wait for Leader</button>
-            <button class="btn chip-btn marker sm" id="btnQuickUnlock" title="" data-i18n="typeUnlock">Unlock Follower</button>
-            <button class="btn chip-btn auto sm" id="btnQuickPark" title="" data-i18n="typePark">Park</button>
-            <button class="btn chip-btn auto sm" id="btnQuickRefuel" title="" data-i18n="typeRefuel">Refuel</button>
-            <button class="btn chip-btn auto sm" id="btnQuickRepair" title="" data-i18n="typeRepair">Repair</button>
+            <span class="quick-add">
+              <button class="btn chip-btn marker sm" id="btnQuickWait" title="" data-i18n="typeWait">Wait for Leader</button>
+              <button class="btn chip-btn marker sm" id="btnQuickUnlock" title="" data-i18n="typeUnlock">Unlock Follower</button>
+            </span>
+            <span class="quick-add">
+              <button class="btn chip-btn auto sm" id="btnQuickPark" title="" data-i18n="typePark">Park</button>
+              <button class="btn chip-btn auto sm" id="btnQuickRefuel" title="" data-i18n="typeRefuel">Refuel</button>
+              <button class="btn chip-btn auto sm" id="btnQuickRepair" title="" data-i18n="typeRepair">Repair</button>
+            </span>
           </div>
         </div>
         <div class="step-list" id="stepList"></div>

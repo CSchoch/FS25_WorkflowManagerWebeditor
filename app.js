@@ -128,7 +128,7 @@ const I18N = {
     settingsSet: (n) => `${n} override(s) set`, settingsNone: "using AutoDrive defaults",
     validationMissingTarget: "Target missing",
     validationMarkerInSupport: "Sync markers can't run as support sub-steps — change the type or delete this row",
-    metaId: "ID", metaSteps: "Steps", metaSupport: "Support steps",
+    metaId: "ID", supportStepCount: (n) => `${n} support step${n === 1 ? "" : "s"}`,
     moveUp: "Move up", moveDown: "Move down", edit: "Edit", langName: "EN",
     dropHere: "Drop workflowManager.xml to import",
     openSavegameBtn: "Open savegame",
@@ -243,7 +243,7 @@ const I18N = {
     settingsSet: (n) => `${n} Überschreibung(en) gesetzt`, settingsNone: "AutoDrive-Standard",
     validationMissingTarget: "Ziel fehlt",
     validationMarkerInSupport: "Sync-Marker funktionieren nicht als Unterstützungsschritt — Typ ändern oder Zeile löschen",
-    metaId: "ID", metaSteps: "Schritte", metaSupport: "Unterstützungsschritte",
+    metaId: "ID", supportStepCount: (n) => `${n} Unterstützungsschritt${n === 1 ? "" : "e"}`,
     moveUp: "Nach oben", moveDown: "Nach unten", edit: "Bearbeiten", langName: "DE",
     dropHere: "workflowManager.xml zum Importieren ablegen",
     openSavegameBtn: "Spielstand öffnen",
@@ -826,7 +826,6 @@ const ICONS = {
   grip: '<svg viewBox="0 0 10 18"><circle cx="2.5" cy="3" r="1.6" fill="currentColor"/><circle cx="7.5" cy="3" r="1.6" fill="currentColor"/><circle cx="2.5" cy="9" r="1.6" fill="currentColor"/><circle cx="7.5" cy="9" r="1.6" fill="currentColor"/><circle cx="2.5" cy="15" r="1.6" fill="currentColor"/><circle cx="7.5" cy="15" r="1.6" fill="currentColor"/></svg>',
   up: '<svg viewBox="0 0 24 24"><path d="m6 14 6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   down: '<svg viewBox="0 0 24 24"><path d="m6 10 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-  edit: '<svg viewBox="0 0 24 24"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
   trash: '<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m3 0-1 13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
   copy: '<svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
   plusSub: '<svg viewBox="0 0 24 24"><path d="M8 5v10a2 2 0 0 0 2 2h3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M17 14v6m-3-3h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
@@ -872,6 +871,9 @@ function applyI18nStatic() {
   for (const node of document.querySelectorAll("[data-i18n-ph]")) {
     node.placeholder = t(node.dataset.i18nPh);
   }
+  for (const node of document.querySelectorAll("[data-i18n-action]")) {
+    node.textContent = actionLabel(node.dataset.i18nAction);
+  }
   $("langLabel").textContent = t("langName");
   $("btnQuickWait").title = t("typeWait");
   $("btnQuickUnlock").title = t("typeUnlock");
@@ -914,14 +916,21 @@ function renderSidebar() {
   }
   for (const wf of filtered) {
     const supportCount = wf.steps.reduce((n, s) => n + (s.support ? s.support.length : 0), 0);
-    const sub = t("stepCount", wf.steps.length) + (supportCount ? ` · ${t("supportCount", supportCount)}` : "");
+    const sub = t("stepCount", wf.steps.length) + (supportCount ? `, ${t("supportStepCount", supportCount)}` : "");
+    const active = wf.id === state.selectedId;
+    // The route in miniature: one tick per main step in its system's colour, so workflows
+    // with similar names still look different (grass vs. arable vs. a 1-step transport).
+    const strip = el("span", { class: "wf-strip", "aria-hidden": "true" });
+    for (const s of wf.steps) strip.append(el("span", { class: typeBadgeClass(s.type) }));
     // The row is a plain element wrapping one selectable button — nesting the duplicate/delete
     // buttons inside a <button> row would be invalid HTML and unreachable for screen readers.
-    const select = el("button", { type: "button", class: "wf-item-main" },
-      el("div", { class: "wf-item-name" }, wf.name || t("unnamed")),
-      el("div", { class: "wf-item-sub" }, sub));
+    const select = el("button", { type: "button", class: "wf-item-main", title: sub, "aria-current": active ? "true" : null },
+      el("span", { class: "wf-item-name" }, wf.name || t("unnamed")),
+      el("span", { class: "wf-item-count", "aria-hidden": "true" }, String(wf.steps.length)),
+      el("span", { class: "sr" }, sub),
+      strip);
     select.addEventListener("click", () => { state.selectedId = wf.id; commit(); });
-    const item = el("div", { class: `wf-item${wf.id === state.selectedId ? " active" : ""}` },
+    const item = el("div", { class: `wf-item${active ? " active" : ""}` },
       select,
       el("div", { class: "wf-item-actions" },
         miniBtn("copy", t("duplicate"), () => duplicateWorkflow(wf.id)),
@@ -942,9 +951,8 @@ function renderEditor() {
 
   const supportCount = wf.steps.reduce((n, s) => n + (s.support ? s.support.length : 0), 0);
   $("wfMeta").replaceChildren(
-    el("span", {}, `${t("metaId")}: ${wf.id}`),
-    el("span", {}, `${t("metaSteps")}: ${wf.steps.length}`),
-    el("span", {}, `${t("metaSupport")}: ${supportCount}`),
+    el("span", {}, t("stepCount", wf.steps.length) + (supportCount ? `, ${t("supportStepCount", supportCount)}` : "")),
+    el("span", { class: "wf-id" }, `${t("metaId")} ${wf.id}`),
   );
 
   // AD settings
@@ -993,8 +1001,12 @@ function stepRow(wf, step, stepIndex, supportIndex) {
   // but imported files from before that restriction can still carry them.
   const strandedMarker = isSupport && isSyncMarkerType(step.type);
 
+  // One stop on the route: the node's colour is the system (the step dialog's job groups),
+  // sync markers on the main line are drawn as gates across it instead of stops.
+  const sys = typeBadgeClass(step.type);
+  const gate = !isSupport && isSyncMarkerType(step.type);
   const row = el("div", {
-    class: `step-row${isSupport ? " support-row" : ""}${missingTarget || strandedMarker ? " invalid" : ""}`,
+    class: `step-row sys-${sys}${isSupport ? " support-row" : ""}${gate ? " gate" : ""}${missingTarget || strandedMarker ? " invalid" : ""}`,
     draggable: "true",
   });
   row.dataset.step = stepIndex;
@@ -1003,32 +1015,46 @@ function stepRow(wf, step, stepIndex, supportIndex) {
   // drag handle
   row.append(el("span", { class: "drag", html: ICONS.grip, title: "" }));
   row.append(el("span", { class: "step-num" }, isSupport ? `${stepIndex + 1}.${supportIndex + 1}` : `${stepIndex + 1}`));
+  row.append(el("span", { class: "node", "aria-hidden": "true" }));
 
-  const line1 = el("div", { class: "step-line1" },
-    el("span", { class: `type-badge ${typeBadgeClass(step.type)}` }, stepTypeLabel(step.type)),
-    marker ? null : el("span", { class: "step-action" }, actionLabel(step.action)));
-
-  const main = el("div", { class: "step-main" }, line1);
+  // The whole summary opens the step dialog — one big target instead of a pencil icon
+  const main = el("button", { type: "button", class: "step-open", title: t("edit") },
+    el("span", { class: "sr" }, `${stepTypeLabel(step.type)}: `),
+    el("span", { class: "step-job" }, marker ? stepTypeLabel(step.type) : actionLabel(step.action)));
 
   if (strandedMarker) {
-    main.append(el("div", { class: "step-target-line" },
-      el("span", { class: "tgt missing" }, `⚠ ${t("validationMarkerInSupport")}`)));
+    main.append(el("span", { class: "step-where missing" }, `⚠ ${t("validationMarkerInSupport")}`));
   }
 
   if (!marker) {
-    const tgtLine = el("div", { class: "step-target-line" });
-    tgtLine.append(el("span", { class: `tgt${missingTarget ? " missing" : ""}` },
-      missingTarget ? `⚠ ${t("validationMissingTarget")}` : step.target));
-    if (step.unloadTarget) {
-      tgtLine.append(el("span", { class: "arrow" }, "→"), el("span", { class: "tgt" }, step.unloadTarget));
+    const where = el("span", { class: "step-where" });
+    if (missingTarget) {
+      where.classList.add("missing");
+      where.append(`⚠ ${t("validationMissingTarget")}`);
+    } else {
+      // Stops in driving order, as the step dialog lists them: Load visits its second
+      // destination ("Load At") first and then returns to the target.
+      const stops = [step.target];
+      if (step.unloadTarget) {
+        if (step.action === "load") stops.unshift(step.unloadTarget);
+        else stops.push(step.unloadTarget);
+      }
+      const kind = step.type === STEP_COURSEPLAY ? "cp" : "ad";
+      stops.forEach((name, i) => {
+        if (i > 0) where.append(el("span", { class: "arrow", "aria-hidden": "true" }, "→"));
+        const { group, leaf } = targetGroup(kind, name);
+        where.append(el("span", { class: "tgt", title: name },
+          group ? el("span", { class: "grp" }, `${group}/`) : null, leaf));
+      });
     }
-    main.append(tgtLine);
-    if (step.fillTypes && step.fillTypes.length) {
-      const chips = el("div", { class: "fill-chips" });
-      for (const ft of step.fillTypes) chips.append(el("span", { class: "fill-chip" }, fillTypeTitle(ft)));
-      main.append(chips);
+    main.append(where);
+    const chips = [...(step.fillTypes || []).map(fillTypeTitle)];
+    if (step.seedFruitType) chips.push(seedTypeLabel(step.seedFruitType));
+    if (chips.length) {
+      main.append(el("span", { class: "fill-chips" }, ...chips.map((c) => el("span", { class: "fill-chip" }, c))));
     }
   }
+  main.addEventListener("click", () => openStepModal(wf, { stepIndex, supportIndex }));
   row.append(main);
 
   const siblings = isSupport ? wf.steps[stepIndex].support : wf.steps;
@@ -1040,13 +1066,11 @@ function stepRow(wf, step, stepIndex, supportIndex) {
   actions.append(
     miniBtn("up", t("moveUp"), () => moveStep(wf, stepIndex, supportIndex, -1), { disabled: idx === 0 }),
     miniBtn("down", t("moveDown"), () => moveStep(wf, stepIndex, supportIndex, +1), { disabled: idx === siblings.length - 1 }),
-    miniBtn("edit", t("edit"), () => openStepModal(wf, { stepIndex, supportIndex })),
     miniBtn("copy", t("duplicate"), () => duplicateStep(wf, stepIndex, supportIndex)),
     miniBtn("trash", t("delete"), () => requestDeleteStep(wf, stepIndex, supportIndex), { class: "danger" }),
   );
   row.append(actions);
 
-  row.addEventListener("dblclick", () => openStepModal(wf, { stepIndex, supportIndex }));
   wireStepDrag(row, wf, stepIndex, supportIndex);
   return row;
 }

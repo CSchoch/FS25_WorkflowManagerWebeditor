@@ -73,14 +73,30 @@ const I18N = {
       load: "Load", unload: "Unload Combine", fieldwork: "Field Work", bale_collect: "Bale Collect",
     },
     targetsTitle: "Targets & Courses",
-    targetsHint: "The game reads AutoDrive destinations and Courseplay courses live — the browser can't. Maintain the lists here so step dialogs offer suggestions. Names found in imported workflows are added automatically.",
-    adDests: "AutoDrive destinations", cpCourses: "Courseplay courses",
-    addDestPh: "Add destination…", addCoursePh: "Add course…",
-    importAdConfig: "Import from AutoDrive_config.xml", importCpCourses: "Import course folder",
-    importCpHint: "Pick your Courseplay “Courses” folder (or the map/Singleplayer folder inside it) — the folder structure is part of the course name.",
+    targetsHint: "Step dialogs suggest these names as you type. Names your workflows use are always listed.",
+    targetsScope: (d) => `For ${d}`, targetsScopeNone: "No savegame open — these lists apply until you open one",
+    tgAdTitle: "Destinations", tgCpTitle: "Courses",
+    addDestPh: "Filter or add a destination…", addCoursePh: "Filter or add a course…",
+    importAdConfig: "Import file", importCpCourses: "Import folder",
+    importAdTitle: "Add the destinations of an AutoDrive_config.xml — it's in your savegame folder.",
+    importCpTitle: "Pick your map's folder inside …/modSettings/FS25_Courseplay/Courses — the folder structure is part of the course name.",
+    linkCpFolder: "Link folder", relinkCpFolder: "Change folder",
+    linkCpFolderTitle: "Pick …/modSettings/FS25_Courseplay/Courses (covers every map) or one map's folder inside it, e.g. Courses/FS25_NDL.NDL (that map only).",
+    tgAdSourceLinked: (d) => `Read from AutoDrive_config.xml in ${d} when you open or reload it.`,
+    tgAdSourceOpen: "Open a savegame to read its destinations, or import an AutoDrive_config.xml.",
+    tgAdSourceManual: "Import the AutoDrive_config.xml from your savegame folder, or type names below.",
+    tgCpSourceUnlinked: "Link Courseplay's Courses folder once — every savegame then gets the courses of its map.",
+    tgCpSourceLinked: "Read from the linked Courses folder, for the savegame's map, when you open or reload it.",
+    tgCpSourceMap: (m) => `Linked to map ${m} only. Link the Courses folder itself to cover every map.`,
+    tgCpSourceManual: "Import your map's folder from …/modSettings/FS25_Courseplay/Courses, or type names below.",
+    tgCountFiltered: (n, total) => `${n} of ${total}`,
+    tgNoMatch: (q) => `No match. Press Enter to add “${q}”.`,
+    tgAdEmpty: "No destinations yet.", tgCpEmpty: "No courses yet.",
+    tgAdNoGroup: "No group", tgCpNoGroup: "No folder",
+    tgRemove: (n) => `Remove ${n}`,
     noEntries: "No entries yet",
     noMatches: "No matches — free text is kept as-is",
-    targetHintAd: "AutoDrive map marker name. Manage suggestions under “Targets”.",
+    targetHintAd: "AutoDrive destination as the game lists it (group/marker name). Manage suggestions under “Targets”.",
     targetHintCp: "Courseplay course name (with folder prefix if used). Manage suggestions under “Targets”.",
     confirmDeleteWf: (n) => `Delete workflow “${n}”?`,
     confirmDeleteStep: "Delete this step (including its support steps)?",
@@ -115,6 +131,17 @@ const I18N = {
     toastSavegameReadFailed: "Could not read that folder",
     toastSavegameNoFile: (d) => `${d} has no workflowManager.xml yet — Save will create it`,
     toastNotSavegame: (d) => `${d} does not look like a savegame folder (no careerSavegame.xml)`,
+    reloadBtn: "Reload",
+    reloadTitle: (d) => `Read workflowManager.xml, AutoDrive destinations and Courseplay courses from ${d} again — e.g. after changing them in-game.`,
+    confirmReloadDiscard: (d) => `Reload from ${d}? Changes made here that were not saved to ${d} are lost.`,
+    toastAdScanned: (n) => `${n} AutoDrive destination(s) read from AutoDrive_config.xml`,
+    toastAdScanFailed: "Could not read AutoDrive_config.xml",
+    toastCpScanned: (n, m) => `${n} Courseplay course(s) found for map ${m}`,
+    toastCpScanFailed: "Could not read the Courseplay folder — link it again under “Targets”",
+    toastCpNoPermission: "No access to the Courseplay folder — click Reload to allow it",
+    toastCpLinked: "Courseplay folder linked",
+    toastNotCoursesFolder: (d) => `${d} is neither Courseplay's “Courses” folder (…/modSettings/FS25_Courseplay/Courses) nor a map folder inside it`,
+    toastCpOtherMap: (linked, m) => `The linked Courseplay folder is for map ${linked}, this savegame uses ${m} — link the “Courses” folder to cover every map`,
   },
   de: {
     appTitle: "Workflow Manager", appSubtitle: "FS25 Web-Editor",
@@ -150,14 +177,30 @@ const I18N = {
       load: "Abholen", unload: "Drescher abfahren", fieldwork: "Feldarbeit", bale_collect: "Ballen sammeln",
     },
     targetsTitle: "Ziele & Kurse",
-    targetsHint: "Das Spiel liest AutoDrive-Ziele und Courseplay-Kurse live — der Browser kann das nicht. Pflege die Listen hier, damit die Schritt-Dialoge Vorschläge anbieten. Namen aus importierten Workflows werden automatisch ergänzt.",
-    adDests: "AutoDrive-Ziele", cpCourses: "Courseplay-Kurse",
-    addDestPh: "Ziel hinzufügen…", addCoursePh: "Kurs hinzufügen…",
-    importAdConfig: "Aus AutoDrive_config.xml importieren", importCpCourses: "Kursordner importieren",
-    importCpHint: "Wähle deinen Courseplay-Ordner „Courses“ (oder den Map-/Singleplayer-Ordner darin) — die Ordnerstruktur ist Teil des Kursnamens.",
+    targetsHint: "Die Schritt-Dialoge schlagen diese Namen beim Tippen vor. Namen aus deinen Workflows sind immer dabei.",
+    targetsScope: (d) => `Für ${d}`, targetsScopeNone: "Kein Spielstand geöffnet — diese Listen gelten, bis du einen öffnest",
+    tgAdTitle: "Ziele", tgCpTitle: "Kurse",
+    addDestPh: "Ziel filtern oder hinzufügen…", addCoursePh: "Kurs filtern oder hinzufügen…",
+    importAdConfig: "Datei importieren", importCpCourses: "Ordner importieren",
+    importAdTitle: "Übernimmt die Ziele einer AutoDrive_config.xml — sie liegt in deinem Spielstand-Ordner.",
+    importCpTitle: "Wähle den Ordner deiner Karte in …/modSettings/FS25_Courseplay/Courses — die Ordnerstruktur ist Teil des Kursnamens.",
+    linkCpFolder: "Ordner verknüpfen", relinkCpFolder: "Ordner ändern",
+    linkCpFolderTitle: "Wähle …/modSettings/FS25_Courseplay/Courses (deckt alle Karten ab) oder den Ordner einer Karte darin, z. B. Courses/FS25_NDL.NDL (nur diese Karte).",
+    tgAdSourceLinked: (d) => `Wird beim Öffnen und Neuladen aus der AutoDrive_config.xml in ${d} gelesen.`,
+    tgAdSourceOpen: "Öffne einen Spielstand, um seine Ziele zu lesen, oder importiere eine AutoDrive_config.xml.",
+    tgAdSourceManual: "Importiere die AutoDrive_config.xml aus deinem Spielstand-Ordner oder tippe Namen unten ein.",
+    tgCpSourceUnlinked: "Verknüpfe einmalig Courseplays Ordner „Courses“ — jeder Spielstand bekommt dann die Kurse seiner Karte.",
+    tgCpSourceLinked: "Wird beim Öffnen und Neuladen für die Karte des Spielstands aus dem verknüpften Ordner „Courses“ gelesen.",
+    tgCpSourceMap: (m) => `Nur mit Karte ${m} verknüpft. Verknüpfe den Ordner „Courses“ selbst, um alle Karten abzudecken.`,
+    tgCpSourceManual: "Importiere den Ordner deiner Karte aus …/modSettings/FS25_Courseplay/Courses oder tippe Namen unten ein.",
+    tgCountFiltered: (n, total) => `${n} von ${total}`,
+    tgNoMatch: (q) => `Kein Treffer. Enter fügt „${q}“ hinzu.`,
+    tgAdEmpty: "Noch keine Ziele.", tgCpEmpty: "Noch keine Kurse.",
+    tgAdNoGroup: "Ohne Gruppe", tgCpNoGroup: "Ohne Ordner",
+    tgRemove: (n) => `${n} entfernen`,
     noEntries: "Noch keine Einträge",
     noMatches: "Keine Treffer — Freitext wird übernommen",
-    targetHintAd: "Name des AutoDrive-Kartenmarkers. Vorschläge unter „Ziele“ verwalten.",
+    targetHintAd: "AutoDrive-Ziel wie im Spiel gelistet (Gruppe/Markername). Vorschläge unter „Ziele“ verwalten.",
     targetHintCp: "Courseplay-Kursname (ggf. mit Ordner-Präfix). Vorschläge unter „Ziele“ verwalten.",
     confirmDeleteWf: (n) => `Workflow „${n}“ löschen?`,
     confirmDeleteStep: "Diesen Schritt (inkl. Unterstützungsschritte) löschen?",
@@ -192,6 +235,17 @@ const I18N = {
     toastSavegameReadFailed: "Ordner konnte nicht gelesen werden",
     toastSavegameNoFile: (d) => `${d} enthält noch keine workflowManager.xml — Speichern legt sie an`,
     toastNotSavegame: (d) => `${d} sieht nicht wie ein Spielstand-Ordner aus (keine careerSavegame.xml)`,
+    reloadBtn: "Neu laden",
+    reloadTitle: (d) => `workflowManager.xml, AutoDrive-Ziele und Courseplay-Kurse erneut aus ${d} lesen — z. B. nach Änderungen im Spiel.`,
+    confirmReloadDiscard: (d) => `Aus ${d} neu laden? Änderungen, die hier gemacht und nicht nach ${d} gespeichert wurden, gehen verloren.`,
+    toastAdScanned: (n) => `${n} AutoDrive-Ziel(e) aus AutoDrive_config.xml gelesen`,
+    toastAdScanFailed: "AutoDrive_config.xml konnte nicht gelesen werden",
+    toastCpScanned: (n, m) => `${n} Courseplay-Kurs(e) für Karte ${m} gefunden`,
+    toastCpScanFailed: "Courseplay-Ordner konnte nicht gelesen werden — unter „Ziele“ neu verknüpfen",
+    toastCpNoPermission: "Kein Zugriff auf den Courseplay-Ordner — zum Erlauben „Neu laden“ klicken",
+    toastCpLinked: "Courseplay-Ordner verknüpft",
+    toastNotCoursesFolder: (d) => `${d} ist weder der Courseplay-Ordner „Courses“ (…/modSettings/FS25_Courseplay/Courses) noch ein Karten-Ordner darin`,
+    toastCpOtherMap: (linked, m) => `Der verknüpfte Courseplay-Ordner gehört zur Karte ${linked}, dieser Spielstand nutzt ${m} — verknüpfe den Ordner „Courses“, um alle Karten abzudecken`,
   },
 };
 
@@ -260,7 +314,10 @@ const LS_KEY = "fs25wm.webeditor.v1";
 const state = {
   workflows: [],
   selectedId: null,
-  targets: { ad: [], cp: [] },
+  // Target suggestions per savegame folder name ("" = no savegame open): every savegame has its
+  // own AutoDrive network and map. `targets` is the active savegame's entry (see useLibrary).
+  libraries: { "": { ad: [], cp: [] } },
+  targets: null,
   customFillTypes: [],       // [{name, title}]
   lang: (navigator.language || "en").toLowerCase().startsWith("de") ? "de" : "en",
   theme: null,               // null = follow system
@@ -270,10 +327,16 @@ function saveState() {
   try {
     localStorage.setItem(LS_KEY, JSON.stringify({
       workflows: state.workflows, selectedId: state.selectedId,
-      targets: state.targets, customFillTypes: state.customFillTypes,
+      libraries: state.libraries, customFillTypes: state.customFillTypes,
       lang: state.lang, theme: state.theme,
     }));
   } catch (e) { /* storage full/blocked — editing still works in-memory */ }
+}
+
+/** Makes the target lists of savegame folder `key` the active ones. */
+function useLibrary(key) {
+  if (!state.libraries[key]) state.libraries[key] = { ad: [], cp: [] };
+  state.targets = state.libraries[key];
 }
 
 function loadState() {
@@ -283,7 +346,15 @@ function loadState() {
     const data = JSON.parse(raw);
     if (Array.isArray(data.workflows)) state.workflows = data.workflows;
     state.selectedId = data.selectedId || null;
-    if (data.targets) state.targets = { ad: data.targets.ad || [], cp: data.targets.cp || [] };
+    if (data.libraries && typeof data.libraries === "object") {
+      for (const [key, lib] of Object.entries(data.libraries)) {
+        state.libraries[key] = { ad: lib.ad || [], cp: lib.cp || [] };
+      }
+    } else if (data.targets) {
+      // One shared list before per-savegame lists — it can't be told apart, so it stays the
+      // "no savegame" list instead of leaking another map's names into every savegame.
+      state.libraries[""] = { ad: data.targets.ad || [], cp: data.targets.cp || [] };
+    }
     if (Array.isArray(data.customFillTypes)) state.customFillTypes = data.customFillTypes;
     if (data.lang === "en" || data.lang === "de") state.lang = data.lang;
     if (data.theme === "light" || data.theme === "dark") state.theme = data.theme;
@@ -293,6 +364,7 @@ function loadState() {
       state.selectedId = state.workflows[0]?.id || null;
     }
   } catch (e) { /* corrupted storage — start fresh */ }
+  finally { useLibrary(""); } // the savegame's lists follow once restoreLink() finds the link
 }
 
 const t = (key, ...args) => {
@@ -641,15 +713,18 @@ function exportWorkflowsXml() {
    AutoDrive config / CP course file import (target suggestions)
    ============================================================ */
 
-function importAdConfigXml(xmlText) {
+/** Destination names as the game's step dialog stores them: "group/name", or the bare name for
+ *  AutoDrive's default group "All" (mirrors ADIntegration:getDestinations). Null when the file
+ *  holds no map markers. */
+function adMarkerNames(xmlText) {
   const doc = new DOMParser().parseFromString(xmlText, "text/xml");
-  if (doc.querySelector("parsererror")) return 0;
+  if (doc.querySelector("parsererror")) return null;
   const names = new Set();
-  // AutoDrive config: <mapmarker><mm1><name>Field 1</name>…  (id/name variants tolerated)
+  // AutoDrive config: <mapmarker><mm1><name>Feld 9</name><group>Felder 01-20</group>…
   for (const mm of doc.querySelectorAll("mapmarker > *")) {
-    const nameEl = mm.querySelector("name");
-    const name = (nameEl ? nameEl.textContent : "").trim();
-    if (name) names.add(name);
+    const name = (mm.querySelector("name")?.textContent || "").trim();
+    const group = (mm.querySelector("group")?.textContent || "").trim();
+    if (name) names.add(group && group !== "All" ? `${group}/${name}` : name);
   }
   // Fallback: <marker name="..."> style
   if (names.size === 0) {
@@ -658,12 +733,24 @@ function importAdConfigXml(xmlText) {
       if (name) names.add(name);
     }
   }
+  return names.size ? [...names] : null;
+}
+
+function importAdConfigXml(xmlText) {
+  const names = adMarkerNames(xmlText);
+  if (!names) return -1;
   let added = 0;
   for (const name of names) {
     if (!state.targets.ad.includes(name)) { state.targets.ad.push(name); added++; }
   }
   state.targets.ad.sort((a, b) => a.localeCompare(b));
-  return names.size === 0 ? -1 : added;
+  return added;
+}
+
+/** Courseplay course files have no extension ("…/F01/Kalken"), so a folder pick is filtered by
+ *  content: a course file is XML with a <Courses> root. Reads only the first bytes. */
+async function isCourseFile(file) {
+  return (await file.slice(0, 512).text()).includes("<Courses");
 }
 
 /** Root-relative course name for a picked file ("Singleplayer/F34/Kalken").
@@ -676,15 +763,15 @@ function importAdConfigXml(xmlText) {
  *  the result is identical no matter which level the user picked. */
 function courseNameFromFile(file) {
   const rel = String(file.webkitRelativePath || file.name).replace(/\\/g, "/");
-  const parts = rel.replace(/\.xml$/i, "").split("/").filter(Boolean);
+  const parts = rel.split("/").filter(Boolean);
   const rootIndex = parts.indexOf("Singleplayer");
   return (rootIndex >= 0 ? parts.slice(rootIndex) : parts).join("/").trim();
 }
 
-function importCpCourseFiles(files) {
+async function importCpCourseFiles(files) {
   let added = 0;
   for (const f of files) {
-    if (!/\.xml$/i.test(f.name)) continue; // a folder pick hands us everything inside it
+    if (!(await isCourseFile(f))) continue; // a folder pick hands us everything inside it
     const name = courseNameFromFile(f);
     if (name && !state.targets.cp.includes(name)) { state.targets.cp.push(name); added++; }
   }
@@ -771,6 +858,8 @@ function applyI18nStatic() {
   $("btnQuickRepair").title = t("typeRepair");
   $("btnOpenSavegame").hidden = !canLinkSavegame;
   $("btnOpenSavegame").title = t("openSavegameTitle");
+  $("btnReload").hidden = !link.dir;
+  $("btnReload").title = link.dir ? t("reloadTitle", link.dir.name) : "";
   $("exportLabel").textContent = link.dir ? t("saveToBtn", link.dir.name) : t("exportBtn");
   $("btnExport").title = link.dir ? t("saveToTitle", link.dir.name) : "";
 }
@@ -1398,62 +1487,129 @@ function renderFillPicker() {
    Targets modal
    ============================================================ */
 
+const TARGET_INPUT = { ad: "newAdTarget", cp: "newCpTarget" };
+const TARGET_ADD = { ad: "btnAddAdTarget", cp: "btnAddCpTarget" };
+
 function renderTargetsModal() {
-  for (const [kind, listId] of [["ad", "adTargetItems"], ["cp", "cpTargetItems"]]) {
-    const ul = $(listId);
-    ul.replaceChildren();
-    const items = state.targets[kind];
-    if (items.length === 0) {
-      ul.append(el("li", { class: "none" }, t("noEntries")));
-      continue;
-    }
-    for (const name of items) {
-      const li = el("li", {}, el("span", { title: name }, name));
-      const rm = el("button", { type: "button", "aria-label": "remove" }, "✕");
+  $("targetsScope").textContent = link.dir ? t("targetsScope", link.dir.name) : t("targetsScopeNone");
+
+  // A savegame scan replaces the list, so a manual import only matters while nothing is linked.
+  $("adSource").textContent = link.dir ? t("tgAdSourceLinked", link.dir.name)
+    : canLinkSavegame ? t("tgAdSourceOpen") : t("tgAdSourceManual");
+  $("btnImportAdConfig").hidden = !!link.dir;
+  $("btnImportAdConfig").title = t("importAdTitle");
+
+  const linkBtn = $("btnLinkCpFolder");
+  linkBtn.hidden = !canLinkSavegame;
+  linkBtn.textContent = t(courses.dir ? "relinkCpFolder" : "linkCpFolder");
+  linkBtn.title = t("linkCpFolderTitle");
+  linkBtn.classList.toggle("primary", !courses.dir); // the one thing to do while unlinked
+  linkBtn.classList.toggle("ghost", !!courses.dir);
+  $("cpSource").textContent = !canLinkSavegame ? t("tgCpSourceManual")
+    : !courses.dir ? t("tgCpSourceUnlinked")
+    : courses.mapId ? t("tgCpSourceMap", courses.mapId) : t("tgCpSourceLinked");
+  $("btnImportCpCourses").hidden = !!courses.dir;
+  $("btnImportCpCourses").title = t("importCpTitle");
+
+  renderTargetList("ad");
+  renderTargetList("cp");
+}
+
+/** The group a name is listed under in-game, and the rest: AutoDrive destinations are
+ *  "group/marker", courses are folder paths ("Singleplayer/F01/Kalken" sits in folder "F01"). */
+function targetGroup(kind, name) {
+  const cut = kind === "ad" ? name.indexOf("/") : name.lastIndexOf("/");
+  if (cut <= 0) return { group: "", leaf: name };
+  const group = name.slice(0, cut);
+  return { group: kind === "cp" ? group.replace(/^Singleplayer(\/|$)/, "") : group, leaf: name.slice(cut + 1) };
+}
+
+/** One list, filtered by its input and grouped like the game groups it. */
+function renderTargetList(kind) {
+  const ul = $(`${kind}TargetItems`);
+  const query = $(TARGET_INPUT[kind]).value.trim();
+  const q = query.toLowerCase();
+  const all = state.targets[kind];
+  const shown = all.filter((n) => !q || n.toLowerCase().includes(q));
+  $(`${kind}Count`).textContent = q ? t("tgCountFiltered", shown.length, all.length) : String(all.length);
+  $(TARGET_ADD[kind]).disabled = !query || all.includes(query);
+
+  // Removing re-renders the list; keep keyboard focus on the row that took the removed one's place.
+  const removes = [...ul.querySelectorAll(".tg-remove")];
+  const focusIndex = removes.indexOf(document.activeElement);
+  ul.replaceChildren();
+  if (shown.length === 0) {
+    ul.append(el("li", { class: "none" }, q ? t("tgNoMatch", query) : t(kind === "ad" ? "tgAdEmpty" : "tgCpEmpty")));
+    return;
+  }
+
+  const byGroup = new Map();
+  for (const name of shown) {
+    const { group, leaf } = targetGroup(kind, name);
+    if (!byGroup.has(group)) byGroup.set(group, []);
+    byGroup.get(group).push({ name, leaf });
+  }
+  // Numeric collation: "Feld 9" before "Feld 10", as the game's own lists sort.
+  const coll = new Intl.Collator(state.lang, { numeric: true });
+  const groups = [...byGroup.keys()].sort((a, b) => (a ? 1 : 0) - (b ? 1 : 0) || coll.compare(a, b));
+  for (const group of groups) {
+    const items = byGroup.get(group).sort((a, b) => coll.compare(a.leaf, b.leaf));
+    ul.append(el("li", { class: "tg-group" },
+      el("span", {}, group || t(kind === "ad" ? "tgAdNoGroup" : "tgCpNoGroup")),
+      el("span", { class: "tg-group-n" }, String(items.length))));
+    for (const { name, leaf } of items) {
+      const rm = el("button", { type: "button", class: "tg-remove", "aria-label": t("tgRemove", name), title: t("tgRemove", name) }, "✕");
       rm.addEventListener("click", () => {
         state.targets[kind] = state.targets[kind].filter((n) => n !== name);
         saveState();
-        renderTargetsModal();
+        renderTargetList(kind);
       });
-      li.append(rm);
-      ul.append(li);
+      ul.append(el("li", { class: "tg-item" }, el("span", { title: name }, leaf), rm));
     }
+  }
+  if (focusIndex >= 0) {
+    const next = ul.querySelectorAll(".tg-remove");
+    (next[focusIndex] || next[next.length - 1])?.focus();
   }
 }
 
-function addTargetFromInput(kind, inputId) {
-  const input = $(inputId);
+function addTargetFromInput(kind) {
+  const input = $(TARGET_INPUT[kind]);
   const name = input.value.trim();
   if (!name) return;
   rememberTarget(kind, name);
   input.value = "";
   saveState();
-  renderTargetsModal();
+  renderTargetList(kind);
 }
 
 /* ============================================================
    File import / export
    ============================================================ */
 
-function applyImport(result) {
-  state.workflows = result.workflows;
+function harvestWorkflowTargets() {
   for (const wf of state.workflows) {
     for (const step of wf.steps) {
       harvestStepTargets(step);
       for (const sub of step.support || []) harvestStepTargets(sub);
     }
   }
-  state.selectedId = state.workflows[0]?.id || null;
+}
+
+function applyImport(result) {
+  state.workflows = result.workflows;
+  harvestWorkflowTargets();
+  // Reloading the same savegame keeps the workflow being edited open.
+  if (!state.workflows.some((w) => w.id === state.selectedId)) state.selectedId = state.workflows[0]?.id || null;
   if (result.migrated) toast(t("toastMigrated"));
   toast(t("toastImported", state.workflows.length));
   commit();
 }
 
-/** @param onApplied runs only once the import is accepted (not when the confirm is cancelled). */
-function handleWorkflowText(text, onApplied) {
+function handleWorkflowText(text) {
   const result = importWorkflowsXml(text);
   if (!result) { toast(t("toastImportFailed"), true); return; }
-  const apply = () => { if (onApplied) onApplied(); applyImport(result); };
+  const apply = () => applyImport(result);
   // An import replaces everything and autosaves over localStorage right after — there is no
   // undo, and the page can be dropped on by accident, so confirm while something is at stake.
   if (state.workflows.length > 0) {
@@ -1488,8 +1644,13 @@ const WM_FILE = "workflowManager.xml";
 const canLinkSavegame = typeof window.showDirectoryPicker === "function";
 // The linked savegame folder, and the file's lastModified when this editor last read or wrote
 // it. The game rewrites the file on every in-game edit and game save, so a different value on
-// Save means writing now would silently drop those changes.
-const link = { dir: null, mtime: null };
+// Save means writing now would silently drop those changes. `synced` is this editor's export at
+// that moment: while the export still equals it, reloading cannot lose anything.
+const link = { dir: null, mtime: null, synced: null };
+// Courseplay's "Courses" folder (…/modSettings/FS25_Courseplay/Courses). Courses are kept outside
+// the savegame, per map (Courses/<mapId>), so they need a folder link of their own. `mapId` is set
+// when the link is a single map's folder instead.
+const courses = { dir: null, mapId: null };
 
 /** Runs one request against the "handles" IndexedDB store — localStorage cannot hold a
  *  directory handle, IndexedDB can, so the link survives a page reload. */
@@ -1509,7 +1670,12 @@ function idbHandles(mode, makeRequest) {
 }
 
 function storeLink() {
-  idbHandles("readwrite", (s) => s.put({ dir: link.dir, mtime: link.mtime }, "savegame"))
+  idbHandles("readwrite", (s) => s.put({ dir: link.dir, mtime: link.mtime, synced: link.synced }, "savegame"))
+    .catch(() => { /* blocked storage — the link just lasts until the page is closed */ });
+}
+
+function storeCoursesLink() {
+  idbHandles("readwrite", (s) => s.put({ dir: courses.dir, mapId: courses.mapId }, "courses"))
     .catch(() => { /* blocked storage — the link just lasts until the page is closed */ });
 }
 
@@ -1517,17 +1683,121 @@ async function restoreLink() {
   if (!canLinkSavegame) return;
   try {
     const saved = await idbHandles("readonly", (s) => s.get("savegame"));
-    if (saved && saved.dir) { link.dir = saved.dir; link.mtime = saved.mtime ?? null; }
+    if (saved && saved.dir) {
+      link.dir = saved.dir; link.mtime = saved.mtime ?? null; link.synced = saved.synced ?? null;
+      useLibrary(link.dir.name);
+    }
+    const cp = await idbHandles("readonly", (s) => s.get("courses"));
+    if (cp && cp.dir) { courses.dir = cp.dir; courses.mapId = cp.mapId ?? null; }
   } catch (e) { /* blocked storage — start unlinked */ }
 }
 
-async function readSavegameFile(dir) {
+/** A restored handle needs its permission re-granted after a page reload; requestPermission
+ *  only works inside the click that started the call (it throws otherwise). */
+async function ensurePermission(handle, mode) {
+  const opts = { mode };
   try {
-    return await (await dir.getFileHandle(WM_FILE)).getFile();
+    return (await handle.queryPermission(opts)) === "granted"
+      || (await handle.requestPermission(opts)) === "granted";
+  } catch (e) { return false; }
+}
+
+async function readSavegameFile(dir, name = WM_FILE) {
+  try {
+    return await (await dir.getFileHandle(name)).getFile();
   } catch (e) {
     if (e.name === "NotFoundError") return null;
     throw e;
   }
+}
+
+/** Course names of one map as Courseplay resolves them — relative to Courses/<mapId>, e.g.
+ *  "Singleplayer/F01/Kalken". Empty when nobody saved a course on that map yet.
+ *  @param mapId null when `coursesDir` already is the map's folder. */
+async function courseNamesForMap(coursesDir, mapId) {
+  let mapDir = coursesDir;
+  if (mapId) {
+    try { mapDir = await coursesDir.getDirectoryHandle(mapId); } catch (e) {
+      if (e.name === "NotFoundError") return [];
+      throw e;
+    }
+  }
+  const names = [];
+  const walk = async (dir, prefix) => {
+    for await (const handle of dir.values()) {
+      const path = prefix + handle.name;
+      if (handle.kind === "directory") await walk(handle, `${path}/`);
+      else if (await isCourseFile(await handle.getFile())) names.push(path);
+    }
+  };
+  await walk(mapDir, "");
+  return names;
+}
+
+/** AutoDrive keeps its network, map markers included, in the savegame folder. */
+async function readAdTargets(dir) {
+  try {
+    const file = await readSavegameFile(dir, "AutoDrive_config.xml");
+    return file ? adMarkerNames(await file.text()) : null;
+  } catch (e) { toast(t("toastAdScanFailed"), true); return null; }
+}
+
+/** Courseplay keeps its courses outside the savegame, per map: <Courses>/<mapId>. A linked map
+ *  folder only serves savegames on that map. */
+async function readCpTargets(dir) {
+  if (!courses.dir) return null;
+  if (!(await ensurePermission(courses.dir, "read"))) { toast(t("toastCpNoPermission"), true); return null; }
+  try {
+    const career = await readSavegameFile(dir, "careerSavegame.xml");
+    const mapId = career && new DOMParser().parseFromString(await career.text(), "text/xml")
+      .querySelector("mapId")?.textContent.trim();
+    if (!mapId) return null;
+    if (courses.mapId && courses.mapId !== mapId) {
+      toast(t("toastCpOtherMap", courses.mapId, mapId), true);
+      return null;
+    }
+    return { mapId, names: await courseNamesForMap(courses.dir, courses.mapId ? null : mapId) };
+  } catch (e) { toast(t("toastCpScanFailed"), true); return null; }
+}
+
+/** Replaces one of the open savegame's target lists with what the mods' files hold. Names the
+ *  workflows use stay in, as after an import. */
+function replaceTargets(kind, names) {
+  state.targets[kind] = [];
+  for (const name of names) rememberTarget(kind, name);
+  harvestWorkflowTargets();
+}
+
+async function scanSavegameTargets() {
+  const dir = link.dir;
+  const ad = await readAdTargets(dir);
+  const cp = await readCpTargets(dir);
+  if (link.dir !== dir) return; // another savegame was opened meanwhile
+  if (ad) { replaceTargets("ad", ad); toast(t("toastAdScanned", ad.length)); }
+  if (cp) { replaceTargets("cp", cp.names); toast(t("toastCpScanned", cp.names.length, cp.mapId)); }
+  saveState();
+  if ($("targetsModal").open) renderTargetsModal();
+}
+
+/** Loads dir's workflowManager.xml into the editor, links dir and refreshes its target lists.
+ *  @param confirmText asked first when set — loading replaces the editor's workflows. */
+async function loadSavegame(dir, confirmText) {
+  let file;
+  try { file = await readSavegameFile(dir); } catch (e) { toast(t("toastSavegameReadFailed"), true); return; }
+  const result = file && importWorkflowsXml(await file.text());
+  if (file && !result) { toast(t("toastImportFailed"), true); return; }
+  const apply = () => {
+    link.dir = dir;
+    link.mtime = file ? file.lastModified : null;
+    useLibrary(dir.name);
+    if (result) applyImport(result);
+    else { toast(t("toastSavegameNoFile", dir.name)); render(); }
+    link.synced = result ? exportWorkflowsXml() : null;
+    storeLink();
+    scanSavegameTargets();
+  };
+  if (result && confirmText) askConfirm(confirmText, apply, "replace");
+  else apply();
 }
 
 async function openSavegame() {
@@ -1535,29 +1805,51 @@ async function openSavegame() {
   try {
     dir = await window.showDirectoryPicker({ mode: "readwrite", startIn: link.dir || "documents" });
   } catch (e) { return; } // picker cancelled
-  let file;
+  const isSavegame = await dir.getFileHandle("careerSavegame.xml").then(() => true, () => false);
+  if (!isSavegame) toast(t("toastNotSavegame", dir.name), true);
+  // An import replaces everything and autosaves over localStorage right after — no undo.
+  loadSavegame(dir, state.workflows.length > 0 ? t("confirmImportReplace", state.workflows.length) : null);
+}
+
+/** Re-reads the linked savegame, e.g. after workflows were edited in-game or AutoDrive markers
+ *  and Courseplay courses changed. Asks only when edits made here were not saved to it. */
+async function reloadSavegame() {
+  if (!(await ensurePermission(link.dir, "readwrite"))) return;
+  const unsaved = state.workflows.length > 0 && exportWorkflowsXml() !== link.synced;
+  loadSavegame(link.dir, unsaved ? t("confirmReloadDiscard", link.dir.name) : null);
+}
+
+/** Accepts the game's user folder or any folder on the way down to Courses (all maps), or one
+ *  map's folder inside Courses — the one that holds "Singleplayer", which the import also takes. */
+async function linkCoursesFolder() {
+  let dir;
   try {
-    const isSavegame = await dir.getFileHandle("careerSavegame.xml").then(() => true, () => false);
-    if (!isSavegame) toast(t("toastNotSavegame", dir.name), true);
-    file = await readSavegameFile(dir);
-  } catch (e) { toast(t("toastSavegameReadFailed"), true); return; }
-  const linkTo = () => { link.dir = dir; link.mtime = file ? file.lastModified : null; storeLink(); };
-  if (!file) {
-    linkTo();
-    toast(t("toastSavegameNoFile", dir.name));
-    render();
-    return;
+    dir = await window.showDirectoryPicker({ startIn: courses.dir || "documents" });
+  } catch (e) { return; } // picker cancelled
+  for (const name of ["modSettings", "FS25_Courseplay", "Courses"]) {
+    dir = await dir.getDirectoryHandle(name).catch(() => dir);
   }
-  handleWorkflowText(await file.text(), linkTo);
+  const isMapFolder = dir.name !== "Courses"
+    && (await dir.getDirectoryHandle("Singleplayer").then(() => true, () => false));
+  if (dir.name !== "Courses" && !isMapFolder) { toast(t("toastNotCoursesFolder", dir.name), true); return; }
+  courses.dir = dir;
+  courses.mapId = isMapFolder ? dir.name : null;
+  storeCoursesLink();
+  renderTargetsModal();
+  toast(t("toastCpLinked"));
+  // After a page reload the savegame link may need a permission prompt — Reload does that.
+  if (link.dir && (await link.dir.queryPermission({ mode: "read" })) === "granted") scanSavegameTargets();
 }
 
 async function writeSavegameFile() {
   try {
+    const xml = exportWorkflowsXml();
     const handle = await link.dir.getFileHandle(WM_FILE, { create: true });
     const writable = await handle.createWritable();
-    await writable.write(exportWorkflowsXml());
+    await writable.write(xml);
     await writable.close();
     link.mtime = (await handle.getFile()).lastModified;
+    link.synced = xml;
     storeLink();
     toast(t("toastSaved", link.dir.name));
   } catch (e) { toast(t("toastSaveFailed", link.dir.name), true); }
@@ -1565,13 +1857,9 @@ async function writeSavegameFile() {
 
 async function saveToSavegame() {
   if (state.workflows.length === 0) { toast(t("toastNothingToExport"), true); return; }
+  if (!(await ensurePermission(link.dir, "readwrite"))) return;
   let current;
   try {
-    // A restored link needs its permission re-granted after a reload; requestPermission only
-    // works inside the click that triggered this save.
-    const opts = { mode: "readwrite" };
-    if ((await link.dir.queryPermission(opts)) !== "granted"
-      && (await link.dir.requestPermission(opts)) !== "granted") return;
     current = await readSavegameFile(link.dir);
   } catch (e) { toast(t("toastSaveFailed", link.dir.name), true); return; }
   if (current && current.lastModified !== link.mtime) {
@@ -1610,9 +1898,14 @@ function init() {
     e.target.value = "";
   });
   $("btnOpenSavegame").addEventListener("click", openSavegame);
+  $("btnReload").addEventListener("click", reloadSavegame);
   $("btnExport").addEventListener("click", () => (link.dir ? saveToSavegame() : downloadExport()));
 
-  $("btnTargets").addEventListener("click", () => { renderTargetsModal(); $("targetsModal").showModal(); });
+  $("btnTargets").addEventListener("click", () => {
+    $(TARGET_INPUT.ad).value = ""; $(TARGET_INPUT.cp).value = "";
+    renderTargetsModal();
+    $("targetsModal").showModal();
+  });
 
   // Sidebar
   $("btnNewWorkflow").addEventListener("click", createWorkflow);
@@ -1681,10 +1974,16 @@ function init() {
   setupCombo("stepUnloadTarget", "unloadComboList", () => "ad");
 
   // Targets modal
-  $("btnAddAdTarget").addEventListener("click", () => addTargetFromInput("ad", "newAdTarget"));
-  $("btnAddCpTarget").addEventListener("click", () => addTargetFromInput("cp", "newCpTarget"));
-  $("newAdTarget").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); addTargetFromInput("ad", "newAdTarget"); } });
-  $("newCpTarget").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); addTargetFromInput("cp", "newCpTarget"); } });
+  for (const kind of ["ad", "cp"]) {
+    const input = $(TARGET_INPUT[kind]);
+    $(TARGET_ADD[kind]).addEventListener("click", () => addTargetFromInput(kind));
+    input.addEventListener("input", () => renderTargetList(kind));
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); addTargetFromInput(kind); }
+      // First Escape clears the filter; preventDefault keeps it from also closing the dialog.
+      else if (e.key === "Escape" && input.value) { e.preventDefault(); input.value = ""; renderTargetList(kind); }
+    });
+  }
   $("btnImportAdConfig").addEventListener("click", () => $("fileAdConfig").click());
   $("fileAdConfig").addEventListener("change", (e) => {
     const file = e.target.files[0];
@@ -1698,12 +1997,15 @@ function init() {
   });
   $("btnImportCpCourses").addEventListener("click", () => $("fileCpCourses").click());
   $("fileCpCourses").addEventListener("change", (e) => {
-    const n = importCpCourseFiles([...e.target.files]);
+    const files = [...e.target.files];
     e.target.value = "";
-    toast(t("toastCpImported", n));
-    saveState();
-    renderTargetsModal();
+    importCpCourseFiles(files).then((n) => {
+      toast(t("toastCpImported", n));
+      saveState();
+      renderTargetsModal();
+    });
   });
+  $("btnLinkCpFolder").addEventListener("click", linkCoursesFolder);
 
   // Confirm modal
   $("confirmOk").addEventListener("click", () => {

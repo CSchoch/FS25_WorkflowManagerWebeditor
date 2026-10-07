@@ -43,6 +43,10 @@ try {
       <svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
       <span data-i18n="openSavegameBtn">Open savegame</span>
     </button>
+    <button class="btn ghost" id="btnReload" hidden>
+      <svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span data-i18n="reloadBtn">Reload</span>
+    </button>
     <button class="btn primary" id="btnExport">
       <svg viewBox="0 0 24 24"><path d="M12 15V3m0 0L8 7m4-4 4 4M4 21h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <span id="exportLabel">Export XML</span>
@@ -221,37 +225,54 @@ try {
 </dialog>
 
 <!-- ============ Targets dialog ============ -->
-<dialog id="targetsModal" class="modal wide">
+<dialog id="targetsModal" class="modal wide" aria-labelledby="targetsTitle">
   <div class="modal-inner">
     <header class="modal-head">
-      <h3 data-i18n="targetsTitle">Targets &amp; Courses</h3>
+      <div class="tg-title">
+        <h3 id="targetsTitle" data-i18n="targetsTitle">Targets &amp; Courses</h3>
+        <p id="targetsScope"></p>
+      </div>
       <button type="button" class="icon-btn" data-close="targetsModal" aria-label="Close">✕</button>
     </header>
-    <div class="modal-body">
-      <p class="hint" data-i18n="targetsHint">The game reads AutoDrive destinations and Courseplay courses live — the browser can't. Maintain the lists here so step dialogs offer suggestions. Names found in imported workflows are added automatically.</p>
-      <div class="targets-grid">
-        <div class="targets-col">
-          <h4><span class="dot ad"></span><span data-i18n="adDests">AutoDrive destinations</span></h4>
-          <div class="add-row">
-            <input type="text" id="newAdTarget" data-i18n-ph="addDestPh" placeholder="Add destination…">
-            <button class="btn primary sm" id="btnAddAdTarget" data-i18n="add">Add</button>
-          </div>
-          <button class="btn ghost sm block" id="btnImportAdConfig" data-i18n="importAdConfig">Import from AutoDrive_config.xml</button>
-          <ul class="target-items" id="adTargetItems"></ul>
+    <div class="tg-body">
+      <!-- Each half: name + count, where the list comes from, filter-or-add, grouped list.
+           The halves share subgrid rows so both lists start at the same height. -->
+      <section class="tg-panel ad" aria-labelledby="adTitle">
+        <header class="tg-head">
+          <span class="type-badge ad" data-i18n="typeAd">AutoDrive</span>
+          <h4 id="adTitle" data-i18n="tgAdTitle">Destinations</h4>
+          <span class="tg-count" id="adCount"></span>
+        </header>
+        <div class="tg-source">
+          <p id="adSource"></p>
+          <button class="btn ghost sm" id="btnImportAdConfig" data-i18n="importAdConfig">Import file</button>
         </div>
-        <div class="targets-col">
-          <h4><span class="dot cp"></span><span data-i18n="cpCourses">Courseplay courses</span></h4>
-          <div class="add-row">
-            <input type="text" id="newCpTarget" data-i18n-ph="addCoursePh" placeholder="Add course…">
-            <button class="btn primary sm" id="btnAddCpTarget" data-i18n="add">Add</button>
-          </div>
-          <button class="btn ghost sm block" id="btnImportCpCourses" data-i18n="importCpCourses">Import course folder</button>
-          <p class="hint" data-i18n="importCpHint">Pick your Courseplay “Courses” folder (or the map/Singleplayer folder inside it) — the folder structure is part of the course name.</p>
-          <ul class="target-items" id="cpTargetItems"></ul>
+        <div class="tg-filter">
+          <input type="search" id="newAdTarget" autocomplete="off" spellcheck="false" data-i18n-ph="addDestPh" placeholder="Filter or add a destination…">
+          <button class="btn primary sm" id="btnAddAdTarget" data-i18n="add">Add</button>
         </div>
-      </div>
+        <ul class="target-items" id="adTargetItems"></ul>
+      </section>
+      <section class="tg-panel cp" aria-labelledby="cpTitle">
+        <header class="tg-head">
+          <span class="type-badge cp" data-i18n="typeCp">Courseplay</span>
+          <h4 id="cpTitle" data-i18n="tgCpTitle">Courses</h4>
+          <span class="tg-count" id="cpCount"></span>
+        </header>
+        <div class="tg-source">
+          <p id="cpSource"></p>
+          <button class="btn sm" id="btnLinkCpFolder" hidden>Link folder</button>
+          <button class="btn ghost sm" id="btnImportCpCourses" data-i18n="importCpCourses">Import folder</button>
+        </div>
+        <div class="tg-filter">
+          <input type="search" id="newCpTarget" autocomplete="off" spellcheck="false" data-i18n-ph="addCoursePh" placeholder="Filter or add a course…">
+          <button class="btn primary sm" id="btnAddCpTarget" data-i18n="add">Add</button>
+        </div>
+        <ul class="target-items" id="cpTargetItems"></ul>
+      </section>
     </div>
-    <footer class="modal-foot">
+    <footer class="modal-foot tg-foot">
+      <p data-i18n="targetsHint">Step dialogs suggest these names as you type. Names your workflows use are always listed.</p>
       <button type="button" class="btn primary" data-close="targetsModal" data-i18n="done">Done</button>
     </footer>
   </div>

@@ -396,6 +396,7 @@ input, select { font: inherit; color: inherit; }
 .fill-list .none { color: var(--text-faint); font-style: italic; padding: 8px 10px; }
 
 /* ---------- Targets modal ---------- */
+.targets-scope { margin: 0 0 4px; font-weight: 600; }
 .targets-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 @media (max-width: 640px) { .targets-grid { grid-template-columns: 1fr; } }
 .targets-col h4 { margin: 0 0 9px; display: flex; align-items: center; gap: 8px; font-size: 14px; }

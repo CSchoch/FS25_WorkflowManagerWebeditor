@@ -25,17 +25,23 @@ no game running, no build step, no dependencies. Deployable as a GitHub Page.
 - **Open savegame** (Chrome/Edge): pick the savegame folder once — its `workflowManager.xml` is
   loaded, and **Save to savegameN** writes straight back into it (File System Access API). The
   folder stays linked across reloads; if the game changed the file since it was loaded, Save asks
-  before overwriting. Firefox/Safari don't offer the API, so there the button is hidden
+  before overwriting. **Reload** reads the savegame again (workflows and target lists) and only
+  asks when the editor holds changes not yet saved to it. Firefox/Safari don't offer the API, so
+  there these buttons are hidden
 - **Import** `workflowManager.xml` (file picker or drop anywhere on the page) — old save
   formats (linked-workflow pairs, per-step sync flags) are migrated exactly like
   `WorkflowStorage.lua` does in-game
 - **Export** a game-ready `workflowManager.xml` (formatVersion 2). It holds workflows only:
   the mod's options and the HUD position are stored per player by the game
   (`modSettings/FS25_WorkflowManager.xml`), so a `<settings>` block in an older file is ignored
-- **Target suggestions**: maintain AutoDrive destination / Courseplay course lists, import
-  marker names straight from an `AutoDrive_config.xml`, or course names by picking your
-  Courseplay `Courses` folder — names are kept root-relative (`Singleplayer/F34/Kalken`),
-  which is what the game matches on; a bare course name can resolve to another field's course
+- **Target suggestions**, one list set **per savegame**: with a linked savegame, Open/Reload
+  read the AutoDrive destinations from its `AutoDrive_config.xml` and — once the Courseplay
+  `Courses` folder is linked under Targets — the courses of its map (`Courses/<mapId>`, from
+  `careerSavegame.xml`). AutoDrive names are `group/marker` like in the game's step dialog.
+  Lists can also be maintained by hand or imported from an `AutoDrive_config.xml` / a map's
+  course folder. Course files have no extension, so they're recognised by content. Course
+  names are kept root-relative (`Singleplayer/F34/Kalken`), which is what the game matches on;
+  a bare course name can resolve to another field's course
 - **Autosave** to browser localStorage, **light/dark mode**, **English/German** UI
 
 ## Usage
@@ -43,7 +49,7 @@ no game running, no build step, no dependencies. Deployable as a GitHub Page.
 1. Open the page (or `index.html` locally — no server needed).
 2. Build your workflows.
 3. Chrome/Edge: **Open savegame** → pick `.../My Games/FarmingSimulator2025/savegameN/` →
-   edit → **Save to savegameN**. Done — no file copying.
+   edit → **Save to savegameN**. Done — no file copying. Changed something in-game? **Reload**.
 4. Any browser: **Export XML** and place `workflowManager.xml` in your savegame folder
    (`.../My Games/FarmingSimulator2025/savegameN/`), replacing the existing file.
    This works while the game is running: the game re-reads the file every time the

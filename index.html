@@ -161,60 +161,66 @@ try {
 </div>
 
 <!-- ============ Step dialog ============ -->
-<dialog id="stepModal" class="modal">
+<dialog id="stepModal" class="modal step-modal" aria-labelledby="stepModalTitle">
   <form method="dialog" class="modal-inner" id="stepForm">
     <header class="modal-head">
-      <h3 id="stepModalTitle">Add Step</h3>
+      <div class="sm-title">
+        <h3 id="stepModalTitle">Add Step</h3>
+        <span class="sm-num" id="stepModalNum"></span>
+      </div>
       <button type="button" class="icon-btn" data-close="stepModal" aria-label="Close">✕</button>
     </header>
-    <div class="modal-body">
-      <div class="field">
-        <label data-i18n="type">Type</label>
-        <div class="seg" id="stepTypeSeg"></div>
-      </div>
+    <!-- Left: one choice for type + mode, grouped by the system that runs it.
+         Right: what that job needs, destinations drawn as a route in driving order. -->
+    <div class="sm-body">
+      <fieldset class="job-picker" id="stepJobPicker">
+        <legend data-i18n="jobLegend">What does the vehicle do?</legend>
+      </fieldset>
 
-      <p class="marker-info" id="markerInfo" hidden></p>
+      <div class="sm-detail" id="stepDetail">
+        <h4 class="sm-job" id="stepJobTitle"></h4>
+        <p class="sm-info" id="markerInfo" hidden></p>
 
-      <div class="field" id="fieldAction">
-        <label id="actionLabel" data-i18n="mode">Mode</label>
-        <div class="select-wrap"><select id="stepAction"></select></div>
-      </div>
-
-      <div class="field" id="fieldTarget">
-        <label id="targetLabel" data-i18n="target">Target</label>
-        <div class="combo" id="targetCombo">
-          <input type="text" id="stepTarget" autocomplete="off" spellcheck="false">
-          <div class="combo-list" id="targetComboList" hidden></div>
-        </div>
+        <ol class="route" id="stepRoute">
+          <li class="stop" id="fieldTarget">
+            <label for="stepTarget" id="targetLabel" data-i18n="target">Target</label>
+            <div class="combo" id="targetCombo">
+              <input type="text" id="stepTarget" autocomplete="off" spellcheck="false">
+              <div class="combo-list" id="targetComboList" hidden></div>
+            </div>
+          </li>
+          <li class="stop" id="fieldUnloadTarget" hidden>
+            <label for="stepUnloadTarget" id="unloadTargetLabel" data-i18n="deliverTo">Deliver To</label>
+            <div class="combo" id="unloadCombo">
+              <input type="text" id="stepUnloadTarget" autocomplete="off" spellcheck="false">
+              <div class="combo-list" id="unloadComboList" hidden></div>
+            </div>
+          </li>
+        </ol>
         <p class="field-hint" id="targetHint"></p>
-      </div>
 
-      <div class="field" id="fieldUnloadTarget" hidden>
-        <label id="unloadTargetLabel" data-i18n="deliverTo">Deliver To</label>
-        <div class="combo" id="unloadCombo">
-          <input type="text" id="stepUnloadTarget" autocomplete="off" spellcheck="false">
-          <div class="combo-list" id="unloadComboList" hidden></div>
+        <div class="field" id="fieldSeedType" hidden>
+          <label for="stepSeedType" data-i18n="seedType">Seed Type</label>
+          <div class="select-wrap"><select id="stepSeedType"></select></div>
         </div>
-      </div>
 
-      <div class="field" id="fieldSeedType" hidden>
-        <label data-i18n="seedType">Seed Type</label>
-        <div class="select-wrap"><select id="stepSeedType"></select></div>
-      </div>
-
-      <div class="field" id="fieldFinishBeforeSwitch" hidden>
-        <label for="stepFinishBeforeSwitch" data-i18n="finishBeforeSwitch">Finish before switching</label>
-        <div class="select-wrap"><select id="stepFinishBeforeSwitch"></select></div>
-        <p class="field-hint" data-i18n="finishBeforeSwitchHint">When the main vehicle moves on to its next step while this support step runs, finish it first, then follow the main vehicle.</p>
-      </div>
-
-      <div class="field" id="fieldFillTypes" hidden>
-        <label data-i18n="fillTypes">Fill Types</label>
-        <div class="fill-picker">
-          <div class="fill-selected" id="fillSelected"></div>
-          <input type="text" id="fillSearch" autocomplete="off" data-i18n-ph="fillSearchPh" placeholder="Search fill types…">
-          <div class="fill-list" id="fillList"></div>
+        <div class="field" id="fieldFillTypes" hidden>
+          <label for="fillSearch" data-i18n="fillTypes">Fill Types</label>
+          <div class="fill-picker" id="fillPicker">
+            <div class="fill-selected" id="fillSelected"></div>
+            <input type="text" id="fillSearch" autocomplete="off" data-i18n-ph="fillSearchPh" placeholder="Search fill types…">
+            <div class="fill-list" id="fillList" tabindex="-1"></div>
+          </div>
         </div>
+
+        <label class="switch-row" id="fieldFinishBeforeSwitch" hidden>
+          <input type="checkbox" role="switch" id="stepFinishBeforeSwitch">
+          <span class="switch" aria-hidden="true"></span>
+          <span class="switch-text">
+            <strong data-i18n="finishBeforeSwitch">Finish before switching</strong>
+            <small data-i18n="finishBeforeSwitchHint">When the main vehicle moves on to its next step while this support step runs, finish it first, then follow the main vehicle.</small>
+          </span>
+        </label>
       </div>
     </div>
     <footer class="modal-foot">

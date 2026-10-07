@@ -55,11 +55,12 @@ const I18N = {
     noSteps: "No steps defined. Click “Add step” to create the first one.",
     typeAd: "AutoDrive", typeCp: "Courseplay", typeWait: "Wait for Leader", typeUnlock: "Unlock Follower",
     typePark: "Park", typeRefuel: "Refuel", typeRepair: "Repair",
-    type: "Type", mode: "Mode", action: "Action", target: "Target",
+    jobLegend: "What does the vehicle do?", syncGroup: "Sync markers",
+    target: "Target", course: "Course",
     pickup: "Pickup", loadAt: "Load At", unloadFirst: "Unload", deliverTo: "Deliver To", returnTo: "Return To",
     fillTypes: "Fill Types", fillSearchPh: "Search fill types…",
     seedType: "Seed Type", seedTypeNone: "None (keep current)",
-    finishBeforeSwitch: "Finish before switching", optNo: "No", optYes: "Yes",
+    finishBeforeSwitch: "Finish before switching",
     finishBeforeSwitchHint: "When the main vehicle moves on to its next step while this support step runs, finish it first, then follow the main vehicle.",
     dialogAddStep: "Add Step", dialogEditStep: "Edit Step",
     dialogAddSupport: "Add Support Step", dialogEditSupport: "Edit Support Step",
@@ -168,11 +169,12 @@ const I18N = {
     noSteps: "Keine Schritte definiert. Klicke auf „Schritt hinzufügen“.",
     typeAd: "AutoDrive", typeCp: "Courseplay", typeWait: "Auf Anführer warten", typeUnlock: "Folger freigeben",
     typePark: "Parken", typeRefuel: "Auftanken", typeRepair: "Reparieren",
-    type: "Typ", mode: "Modus", action: "Aktion", target: "Ziel",
+    jobLegend: "Was macht das Fahrzeug?", syncGroup: "Sync-Marker",
+    target: "Ziel", course: "Kurs",
     pickup: "Abholung", loadAt: "Beladen bei", unloadFirst: "Entladen", deliverTo: "Liefern an", returnTo: "Zurück zu",
     fillTypes: "Fülltypen", fillSearchPh: "Fülltypen suchen…",
     seedType: "Saatgut", seedTypeNone: "Keines (unverändert)",
-    finishBeforeSwitch: "Vor dem Wechsel abschließen", optNo: "Nein", optYes: "Ja",
+    finishBeforeSwitch: "Vor dem Wechsel abschließen",
     finishBeforeSwitchHint: "Wechselt das Hauptfahrzeug zu seinem nächsten Schritt, während dieser Unterstützungsschritt läuft, wird er erst beendet, dann folgt das Fahrzeug.",
     dialogAddStep: "Schritt hinzufügen", dialogEditStep: "Schritt bearbeiten",
     dialogAddSupport: "Unterstützungsschritt hinzufügen", dialogEditSupport: "Unterstützungsschritt bearbeiten",
@@ -1221,10 +1223,18 @@ function openStepModal(wf, { stepIndex = null, supportIndex = null, isNewSupport
     : supportIndex != null ? "dialogEditSupport"
     : modal.isNew ? "dialogAddStep" : "dialogEditStep";
   $("stepModalTitle").textContent = t(titleKey);
+  // The number the step has (or will get) in the step list
+  $("stepModalNum").textContent = isNewSupport ? `${stepIndex + 1}.${(wf.steps[stepIndex].support || []).length + 1}`
+    : supportIndex != null ? `${stepIndex + 1}.${supportIndex + 1}`
+    : `${(modal.isNew ? wf.steps.length : stepIndex) + 1}`;
 
+  renderJobPicker();
   renderStepModal();
   $("stepModal").showModal();
-  if (!isMarkerType(modal.type)) $("stepTarget").focus();
+  const checked = $("stepJobPicker").querySelector("input:checked");
+  checked?.closest(".job").scrollIntoView({ block: "nearest" });
+  if (isMarkerType(modal.type)) checked?.focus();
+  else $("stepTarget").focus();
 }
 
 /** Selectable step types for the currently open dialog (mirrors WMStepDialog:getStepTypes).
@@ -1249,58 +1259,80 @@ function modalCanFinishBeforeSwitch() {
 function renderFinishBeforeSwitch() {
   const show = modalCanFinishBeforeSwitch();
   $("fieldFinishBeforeSwitch").hidden = !show;
-  if (!show) return;
-  $("stepFinishBeforeSwitch").replaceChildren(
-    el("option", { value: "no", selected: !modal.finishBeforeSwitch }, t("optNo")),
-    el("option", { value: "yes", selected: modal.finishBeforeSwitch }, t("optYes")),
-  );
+  if (show) $("stepFinishBeforeSwitch").checked = modal.finishBeforeSwitch;
+}
+
+/** The job picker's choices: step type plus, for AutoDrive/Courseplay, the action — one
+ *  decision for the user, stored as the two fields it always was. Grouped by the system that
+ *  runs the job; Park/Refuel/Repair are AutoDrive jobs, so they sit in its group. */
+function modalJobGroups() {
+  const types = modalStepTypes();
+  const groups = [
+    { cls: "ad", label: t("typeAd"), jobs: [
+      ...AD_ACTIONS.map((action) => ({ type: STEP_AUTODRIVE, action })),
+      ...[STEP_PARK, STEP_REFUEL, STEP_REPAIR].map((type) => ({ type })),
+    ] },
+    { cls: "cp", label: t("typeCp"), jobs: CP_ACTIONS.map((action) => ({ type: STEP_COURSEPLAY, action })) },
+    { cls: "marker", label: t("syncGroup"), jobs: [STEP_WAIT_FOR_LEADER, STEP_UNLOCK_FOLLOWER].map((type) => ({ type })) },
+  ];
+  for (const g of groups) g.jobs = g.jobs.filter((j) => types.includes(j.type));
+  return groups.filter((g) => g.jobs.length);
+}
+
+/** Built once per opening: rebuilding it on every change would drop the focused radio and
+ *  break arrow-key navigation through the group. */
+function renderJobPicker() {
+  const picker = $("stepJobPicker");
+  picker.querySelectorAll(".job-group").forEach((n) => n.remove());
+  for (const g of modalJobGroups()) {
+    const group = el("div", { class: `job-group ${g.cls}` }, el("div", { class: "job-group-name" }, g.label));
+    for (const job of g.jobs) {
+      const input = el("input", { type: "radio", name: "stepJob" });
+      input.checked = job.type === modal.type && (!job.action || job.action === modal.action);
+      input.addEventListener("change", () => selectJob(job));
+      group.append(el("label", { class: `job ${typeBadgeClass(job.type)}` },
+        input, job.action ? actionLabel(job.action) : stepTypeLabel(job.type)));
+    }
+    picker.append(group);
+  }
+}
+
+function selectJob(job) {
+  if (job.type !== modal.type) {
+    modal.type = job.type;
+    $("stepTarget").value = "";
+    $("stepUnloadTarget").value = "";
+    modal.fillTypes = [];
+    modal.seedFruitType = "";
+  }
+  modal.action = job.action || "drive";
+  renderStepModal();
 }
 
 function renderStepModal() {
-  // Type segmented control
-  const seg = $("stepTypeSeg");
-  seg.replaceChildren();
-  for (const type of modalStepTypes()) {
-    const cls = `t-${typeBadgeClass(type)}`;
-    const b = el("button", { type: "button", class: `${cls}${modal.type === type ? " active" : ""}` }, stepTypeLabel(type));
-    b.addEventListener("click", () => {
-      if (modal.type === type) return;
-      modal.type = type;
-      modal.action = type === STEP_COURSEPLAY ? "fieldwork" : "drive";
-      $("stepTarget").value = "";
-      $("stepUnloadTarget").value = "";
-      modal.fillTypes = [];
-      modal.seedFruitType = "";
-      renderStepModal();
-    });
-    seg.append(b);
+  const marker = isMarkerType(modal.type);
+  if (!marker) {
+    const actions = modal.type === STEP_AUTODRIVE ? AD_ACTIONS : CP_ACTIONS;
+    if (!actions.includes(modal.action)) modal.action = actions[0];
   }
+  $("stepDetail").dataset.sys = typeBadgeClass(modal.type);
+  $("stepJobTitle").textContent = marker ? stepTypeLabel(modal.type) : actionLabel(modal.action);
 
   // Before the marker early-out: Park/Refuel/Repair sub-steps take that branch too
   renderFinishBeforeSwitch();
 
-  const marker = isMarkerType(modal.type);
   $("markerInfo").hidden = !marker;
-  $("fieldAction").hidden = marker;
-  $("fieldTarget").hidden = marker;
+  $("stepRoute").hidden = marker;
+  $("targetHint").hidden = marker;
   if (marker) {
-    $("markerInfo").className = `marker-info${isSyncMarkerType(modal.type) ? "" : " auto"}`;
     $("markerInfo").textContent = t(stepInfoKey(modal.type));
-    $("fieldUnloadTarget").hidden = true;
     $("fieldFillTypes").hidden = true;
     $("fieldSeedType").hidden = true;
     return;
   }
 
-  // Action select
-  const actions = modal.type === STEP_AUTODRIVE ? AD_ACTIONS : CP_ACTIONS;
-  if (!actions.includes(modal.action)) modal.action = actions[0];
-  const sel = $("stepAction");
-  sel.replaceChildren(...actions.map((a) => el("option", { value: a, selected: a === modal.action }, actionLabel(a))));
-  $("actionLabel").textContent = modal.type === STEP_AUTODRIVE ? t("mode") : t("action");
-
   // Target labels per action (mirrors in-game dialog labels)
-  let targetLabel = t("target");
+  let targetLabel = modal.type === STEP_COURSEPLAY ? t("course") : t("target");
   if (modal.type === STEP_AUTODRIVE) {
     if (modal.action === "unload") targetLabel = t("unloadFirst");
     else if (modal.action === "pickup_deliver") targetLabel = t("pickup");
@@ -1317,6 +1349,12 @@ function renderStepModal() {
     else if (modal.action === "load") ulLabel = t("loadAt");
     $("unloadTargetLabel").textContent = ulLabel;
   }
+  // Stops in driving order. Load is the one mode that visits its second destination
+  // (unloadTarget, "Load At") first and then returns to the target. Moved in the DOM, not
+  // with CSS order, so Tab follows the route too.
+  const route = $("stepRoute");
+  route.append(modal.action === "load" ? $("fieldTarget") : $("fieldUnloadTarget"));
+  route.classList.toggle("multi", needsUnload);
 
   const needsFill = actionNeedsFillType(modal.type, modal.action);
   $("fieldFillTypes").hidden = !needsFill;
@@ -1448,12 +1486,12 @@ function setupCombo(inputId, listId, kindFn) {
 
 /* ---------- fill type picker ---------- */
 
-function renderFillPicker() {
+function renderFillChips() {
   const selWrap = $("fillSelected");
   selWrap.replaceChildren();
   for (const name of modal.fillTypes) {
     const chip = el("span", { class: "chip" }, fillTypeTitle(name));
-    const x = el("button", { type: "button", "aria-label": "remove" }, "✕");
+    const x = el("button", { type: "button", "aria-label": t("tgRemove", fillTypeTitle(name)) }, "✕");
     x.addEventListener("click", () => {
       modal.fillTypes = modal.fillTypes.filter((n) => n !== name);
       renderFillPicker();
@@ -1461,6 +1499,10 @@ function renderFillPicker() {
     chip.append(x);
     selWrap.append(chip);
   }
+}
+
+function renderFillPicker() {
+  renderFillChips();
 
   const q = $("fillSearch").value.trim().toLowerCase();
   const list = $("fillList");
@@ -1495,7 +1537,7 @@ function renderFillPicker() {
     cb.addEventListener("change", () => {
       if (cb.checked) modal.fillTypes.push(f.name);
       else modal.fillTypes = modal.fillTypes.filter((n) => n !== f.name);
-      renderFillPicker();
+      renderFillChips(); // not the list: that would drop the focused checkbox and close it
     });
     list.append(row);
   }
@@ -2025,10 +2067,23 @@ function init() {
 
   // Step modal
   $("stepForm").addEventListener("submit", (e) => { e.preventDefault(); saveStepModal(); });
-  $("stepAction").addEventListener("change", () => { modal.action = $("stepAction").value; renderStepModal(); });
   $("fillSearch").addEventListener("input", renderFillPicker);
+  // The fill-type list is shown only while the search field or the list has focus. The list
+  // is tabindex=-1 so a click on a row's text keeps focus inside it — otherwise the list
+  // would hide on mousedown and the click would never land.
+  const fillPicker = $("fillPicker");
+  const inFillList = (node) => node === $("fillSearch") || $("fillList").contains(node);
+  fillPicker.addEventListener("focusin", (e) => { if (inFillList(e.target)) fillPicker.classList.add("open"); });
+  fillPicker.addEventListener("focusout", (e) => { if (!inFillList(e.relatedTarget)) fillPicker.classList.remove("open"); });
+  fillPicker.addEventListener("keydown", (e) => {
+    // preventDefault: Escape closing the <dialog> is the key's default action
+    if (e.key === "Escape" && fillPicker.classList.contains("open")) {
+      e.preventDefault();
+      fillPicker.classList.remove("open");
+    }
+  });
   $("stepSeedType").addEventListener("change", (e) => { modal.seedFruitType = e.target.value; });
-  $("stepFinishBeforeSwitch").addEventListener("change", (e) => { modal.finishBeforeSwitch = e.target.value === "yes"; });
+  $("stepFinishBeforeSwitch").addEventListener("change", (e) => { modal.finishBeforeSwitch = e.target.checked; });
   setupCombo("stepTarget", "targetComboList", () => (modal.type === STEP_COURSEPLAY ? "cp" : "ad"));
   setupCombo("stepUnloadTarget", "unloadComboList", () => "ad");
 

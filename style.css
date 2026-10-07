@@ -322,14 +322,87 @@ input, select { font: inherit; color: inherit; }
 .modal-body { padding: 16px 18px; overflow-y: auto; }
 .modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 13px 18px; border-top: 1px solid var(--border); }
 
-.field { margin-bottom: 14px; }
-.field > label { display: block; font-size: 12.5px; font-weight: 700; color: var(--text-dim); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.03em; }
-.field-hint { color: var(--text-faint); font-size: 12px; margin: 5px 0 0; }
-.field input[type="text"], .select-wrap select {
+/* ---------- Step dialog ----------
+   Left: the job picker (type + action as one choice), grouped by system. Right: what the job
+   needs. Destinations are stops on a dashed route in the system's colour (--sys), numbered in
+   driving order when there are two. Everything in the right pane hangs off one 34px gutter
+   that holds the stop markers and the switch. */
+.step-modal { max-width: min(780px, calc(100vw - 32px)); }
+/* Fixed height: switching jobs swaps the right pane's fields, the dialog must not jump */
+.step-modal .modal-inner { height: min(86vh, 660px); }
+.sm-title { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.sm-num {
+  padding: 1px 8px; border: 1px solid var(--border-strong); border-radius: 6px;
+  font-size: 12.5px; font-weight: 700; color: var(--text-dim); font-variant-numeric: tabular-nums;
+}
+.sm-num:empty { display: none; }
+
+.sm-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 232px 1fr; grid-template-rows: minmax(0, 1fr); }
+
+.job-picker {
+  margin: 0; padding: 12px 8px 16px; border: none; min-width: 0; overflow-y: auto;
+  background: var(--bg-inset); border-right: 1px solid var(--border);
+}
+/* float: a fieldset's legend otherwise sits on the border and ignores the scroll box */
+.job-picker legend { float: left; width: 100%; padding: 2px 10px 0; font-size: 12.5px; color: var(--text-dim); }
+.job-group { --sys: var(--ad); clear: both; padding-top: 10px; }
+.job-group.cp { --sys: var(--cp); }
+.job-group.marker { --sys: var(--marker); }
+.job-group-name {
+  display: flex; align-items: center; gap: 8px; padding: 2px 10px 4px;
+  font-size: 12.5px; font-weight: 700; color: var(--sys);
+}
+.job-group-name::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--sys); }
+.job {
+  position: relative; display: block; padding: 5px 10px 5px 26px; border-radius: 7px;
+  cursor: pointer; font-size: 13.5px; user-select: none;
+}
+.job input { position: absolute; opacity: 0; pointer-events: none; }
+.job:hover { background: var(--bg-hover); }
+/* Park/Refuel/Repair choose their own destination — set apart from the routed AD jobs */
+.job:not(.auto) + .job.auto { margin-top: 8px; }
+.job:has(input:checked) { background: color-mix(in srgb, var(--sys) 14%, var(--bg-panel)); color: var(--sys); font-weight: 600; }
+.job:has(input:checked)::before {
+  content: ""; position: absolute; left: 13px; top: 7px; bottom: 7px; width: 3px; border-radius: 2px; background: var(--sys);
+}
+.job:has(input:focus-visible) { outline: 2px solid var(--sys); outline-offset: -2px; }
+
+.sm-detail {
+  --sys: var(--ad); --gutter: 34px;
+  display: flex; flex-direction: column; min-width: 0; overflow-y: auto; padding: 20px 24px 20px;
+}
+.sm-detail[data-sys="cp"] { --sys: var(--cp); }
+.sm-detail[data-sys="marker"] { --sys: var(--marker); }
+.sm-job { margin: 0 0 18px; font-size: 19px; font-weight: 650; line-height: 1.25; }
+.sm-info { margin: 0; max-width: 60ch; color: var(--text-dim); line-height: 1.6; }
+
+.route { list-style: none; margin: 0; padding: 0; counter-reset: stop; }
+.stop { position: relative; padding: 0 0 18px var(--gutter); counter-increment: stop; }
+.stop::before {
+  content: ""; position: absolute; left: 0; top: 1px; box-sizing: border-box;
+  width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--sys);
+  background: var(--bg-panel); color: var(--sys);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.route.multi .stop::before { content: counter(stop); }
+/* The destination is filled: the only stop, or the last of two */
+.route:not(.multi) .stop::before, .route.multi .stop:last-child::before { background: var(--sys); color: var(--bg-panel); }
+.route.multi .stop:first-child::after {
+  content: ""; position: absolute; left: 9px; top: 25px; bottom: 4px; width: 2px;
+  background: repeating-linear-gradient(to bottom, var(--sys) 0 5px, transparent 5px 9px);
+}
+.stop > label { display: block; margin-bottom: 6px; line-height: 22px; font-size: 13px; font-weight: 600; color: var(--text-dim); }
+.route + .field-hint { margin: -8px 0 20px var(--gutter); }
+
+.field { margin: 0 0 18px var(--gutter); }
+.field > label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: var(--text-dim); }
+.field-hint { color: var(--text-faint); font-size: 12.5px; margin: 5px 0 0; max-width: 64ch; }
+.stop input[type="text"], .select-wrap select {
   width: 100%; padding: 9px 11px; border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm); background: var(--bg-inset); outline: none;
 }
-.field input[type="text"]:focus, .select-wrap select:focus { border-color: var(--accent); }
+.stop input[type="text"]:focus, .select-wrap select:focus { border-color: var(--sys); box-shadow: 0 0 0 3px color-mix(in srgb, var(--sys) 18%, transparent); }
 .select-wrap select { appearance: none; cursor: pointer; }
 .select-wrap { position: relative; }
 .select-wrap::after {
@@ -337,23 +410,27 @@ input, select { font: inherit; color: inherit; }
   color: var(--text-faint); pointer-events: none; font-size: 12px;
 }
 
-.seg { display: grid; grid-template-columns: repeat(auto-fit, minmax(115px, 1fr)); gap: 6px; }
-.seg button {
-  border: 1px solid var(--border-strong); background: var(--bg-inset);
-  border-radius: var(--radius-sm); padding: 9px 6px; cursor: pointer; font-weight: 600; font-size: 12.5px;
+/* Support-only option, pinned to the bottom of the pane; its switch sits in the gutter */
+.switch-row {
+  position: relative; display: flex; align-items: flex-start; margin-top: auto;
+  padding-top: 14px; border-top: 1px solid var(--border); cursor: pointer;
 }
-.seg button:hover { background: var(--bg-hover); }
-.seg button.active.t-ad { background: var(--ad-soft); border-color: var(--ad); color: var(--ad); }
-.seg button.active.t-cp { background: var(--cp-soft); border-color: var(--cp); color: var(--cp); }
-.seg button.active.t-marker { background: var(--marker-soft); border-color: var(--marker); color: var(--marker); }
-.seg button.active.t-auto { background: transparent; border-color: var(--ad); color: var(--ad); }
-
-.marker-info {
-  background: var(--marker-soft); color: var(--marker);
-  border-radius: var(--radius-sm); padding: 11px 13px; font-size: 13px; margin: 0 0 14px;
+.switch-row input { position: absolute; opacity: 0; pointer-events: none; }
+.switch {
+  flex: none; position: relative; width: 28px; height: 16px; margin: 2px calc(var(--gutter) - 28px) 0 0;
+  border-radius: 8px; background: var(--border-strong); transition: background 0.15s;
 }
-/* Park/Refuel/Repair share this box but are AutoDrive jobs, not sync markers */
-.marker-info.auto { background: var(--ad-soft); color: var(--ad); }
+.switch::after {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px;
+  border-radius: 50%; background: #fff; transition: transform 0.15s;
+}
+.switch-row input:checked + .switch { background: var(--sys); }
+.switch-row input:checked + .switch::after { transform: translateX(12px); }
+.switch-row input:focus-visible + .switch { outline: 2px solid var(--sys); outline-offset: 2px; }
+.switch-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.switch-text strong { font-size: 13.5px; font-weight: 600; }
+.switch-text small { font-size: 12.5px; color: var(--text-dim); max-width: 60ch; }
+@media (prefers-reduced-motion: reduce) { .switch, .switch::after { transition: none; } }
 
 /* Combobox */
 .combo { position: relative; }
@@ -385,7 +462,11 @@ input, select { font: inherit; color: inherit; }
 }
 .fill-selected .chip button:hover { background: rgba(0,0,0,0.12); }
 #fillSearch { width: 100%; border: none; border-bottom: 1px solid var(--border); background: transparent; padding: 9px 11px; outline: none; }
-.fill-list { max-height: 180px; overflow-y: auto; padding: 4px; }
+.fill-list { max-height: 180px; overflow-y: auto; padding: 4px; outline: none; }
+/* List only while picking (see the fillPicker focus handlers in app.js) */
+.fill-picker:not(.open) .fill-list { display: none; }
+.fill-picker:not(.open) #fillSearch { border-bottom-color: transparent; }
+.fill-picker.open { border-color: var(--sys); }
 .fill-list .ft {
   display: flex; align-items: center; gap: 9px; padding: 6px 9px;
   border-radius: 6px; cursor: pointer; font-size: 13.5px;
@@ -503,6 +584,18 @@ input, select { font: inherit; color: inherit; }
 .tg-foot .btn { margin-left: auto; }
 
 @media (max-width: 640px) {
+  /* Step dialog: picker on top as wrapping chips, one scroll for the whole body */
+  .step-modal .modal-inner { height: auto; max-height: calc(100dvh - 24px); }
+  .sm-body { display: block; overflow-y: auto; }
+  .job-picker { overflow: visible; border-right: none; border-bottom: 1px solid var(--border); padding: 10px 14px 14px; }
+  .job-picker legend { padding: 0; }
+  .job-group { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 10px; }
+  .job-group-name { width: 100%; padding: 0; }
+  .job { padding: 5px 11px; border: 1px solid var(--border-strong); border-radius: 999px; background: var(--bg-panel); }
+  .job:not(.auto) + .job.auto { margin-top: 0; }
+  .job:has(input:checked) { border-color: var(--sys); }
+  .job:has(input:checked)::before { display: none; }
+  .sm-detail { overflow: visible; padding: 18px 16px; }
   .tg-body { grid-template-columns: 1fr; }
   .tg-panel + .tg-panel { border-left: none; border-top: 1px solid var(--border); }
   .target-items { height: 260px; }

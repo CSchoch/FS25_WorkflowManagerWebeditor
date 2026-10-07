@@ -336,6 +336,16 @@ input, select { font: inherit; color: inherit; }
   font-size: 12.5px; font-weight: 700; color: var(--text-dim); font-variant-numeric: tabular-nums;
 }
 .sm-num:empty { display: none; }
+/* Previous/next step around the number */
+.sm-pager { display: flex; align-items: center; gap: 2px; }
+.pager-btn {
+  display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px;
+  border: none; border-radius: 6px; background: transparent; color: var(--text-dim); cursor: pointer;
+}
+.pager-btn svg { width: 16px; height: 16px; }
+.pager-btn:hover:not(:disabled) { background: var(--bg-hover); color: var(--text); }
+.pager-btn:disabled { opacity: 0.3; cursor: default; }
+.pager-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 .sm-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 232px 1fr; grid-template-rows: minmax(0, 1fr); }
 

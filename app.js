@@ -64,6 +64,7 @@ const I18N = {
     finishBeforeSwitchHint: "When the main vehicle moves on to its next step while this support step runs, finish it first, then follow the main vehicle.",
     dialogAddStep: "Add Step", dialogEditStep: "Edit Step",
     dialogAddSupport: "Add Support Step", dialogEditSupport: "Edit Support Step",
+    prevStep: (n) => `Previous step (${n})`, nextStep: (n) => `Next step (${n})`,
     markerWaitInfo: "Sync marker: the vehicle waits here until its leader passes the matching “Unlock Follower” marker. No target or action needed.",
     markerUnlockInfo: "Sync marker: passing this step releases followers waiting at their matching “Wait for Leader” marker. No target or action needed.",
     parkInfo: "Drives to the vehicle's AutoDrive park position (attached implements are checked first — the one furthest behind the vehicle wins — then the vehicle itself). No target or action needed — configure the park position in AutoDrive.",
@@ -178,6 +179,7 @@ const I18N = {
     finishBeforeSwitchHint: "Wechselt das Hauptfahrzeug zu seinem nächsten Schritt, während dieser Unterstützungsschritt läuft, wird er erst beendet, dann folgt das Fahrzeug.",
     dialogAddStep: "Schritt hinzufügen", dialogEditStep: "Schritt bearbeiten",
     dialogAddSupport: "Unterstützungsschritt hinzufügen", dialogEditSupport: "Unterstützungsschritt bearbeiten",
+    prevStep: (n) => `Vorheriger Schritt (${n})`, nextStep: (n) => `Nächster Schritt (${n})`,
     markerWaitInfo: "Sync-Marker: Das Fahrzeug wartet hier, bis sein Anführer den passenden „Folger freigeben“-Marker passiert. Kein Ziel/keine Aktion nötig.",
     markerUnlockInfo: "Sync-Marker: Beim Passieren dieses Schritts werden Folger freigegeben, die an ihrem „Auf Anführer warten“-Marker warten. Kein Ziel/keine Aktion nötig.",
     parkInfo: "Fährt zur in AutoDrive konfigurierten Parkposition des Fahrzeugs (zuerst werden die angehängten Geräte geprüft — das am weitesten hinten liegende gewinnt — dann das Fahrzeug selbst). Kein Ziel/keine Aktion nötig — die Parkposition wird in AutoDrive konfiguriert.",
@@ -1196,7 +1198,19 @@ const modal = {
   finishBeforeSwitch: false,
 };
 
-function openStepModal(wf, { stepIndex = null, supportIndex = null, isNewSupport = false } = {}) {
+/** Every existing step of `wf` in step-list order: 1, 1.1, 1.2, 2, … */
+function stepRefs(wf) {
+  const refs = [];
+  wf.steps.forEach((s, i) => {
+    refs.push({ stepIndex: i, supportIndex: null });
+    (s.support || []).forEach((_, j) => refs.push({ stepIndex: i, supportIndex: j }));
+  });
+  return refs;
+}
+
+const stepRefLabel = (ref) => ref.supportIndex != null ? `${ref.stepIndex + 1}.${ref.supportIndex + 1}` : `${ref.stepIndex + 1}`;
+
+function openStepModal(wf, { stepIndex = null, supportIndex = null, isNewSupport = false, focusField = true } = {}) {
   modal.wf = wf;
   modal.stepIndex = stepIndex;
   modal.supportIndex = supportIndex;
@@ -1225,16 +1239,61 @@ function openStepModal(wf, { stepIndex = null, supportIndex = null, isNewSupport
   $("stepModalTitle").textContent = t(titleKey);
   // The number the step has (or will get) in the step list
   $("stepModalNum").textContent = isNewSupport ? `${stepIndex + 1}.${(wf.steps[stepIndex].support || []).length + 1}`
-    : supportIndex != null ? `${stepIndex + 1}.${supportIndex + 1}`
-    : `${(modal.isNew ? wf.steps.length : stepIndex) + 1}`;
+    : modal.isNew ? `${wf.steps.length + 1}`
+    : stepRefLabel({ stepIndex, supportIndex });
+  renderStepPager();
 
   renderJobPicker();
   renderStepModal();
-  $("stepModal").showModal();
+  if (!$("stepModal").open) $("stepModal").showModal();
   const checked = $("stepJobPicker").querySelector("input:checked");
   checked?.closest(".job").scrollIntoView({ block: "nearest" });
+  if (!focusField) return;
   if (isMarkerType(modal.type)) checked?.focus();
   else $("stepTarget").focus();
+}
+
+/** Previous/next arrows around the step number — only for existing steps: a new one has no
+ *  place in the list to move from until it is saved. */
+function renderStepPager() {
+  const refs = stepRefs(modal.wf);
+  const i = refs.findIndex((r) => r.stepIndex === modal.stepIndex && r.supportIndex === modal.supportIndex);
+  for (const [id, dir, key] of [["stepPrev", -1, "prevStep"], ["stepNext", 1, "nextStep"]]) {
+    const btn = $(id);
+    const ref = refs[i + dir];
+    btn.hidden = modal.isNew;
+    btn.disabled = !ref;
+    btn.title = ref ? t(key, stepRefLabel(ref)) : "";
+    btn.setAttribute("aria-label", ref ? btn.title : t(key, "–"));
+  }
+}
+
+/** Moves the dialog to the neighbouring step. The current step is kept as edited, like Save —
+ *  and like Save, a missing target stops the move and focuses the field. */
+function navigateStepModal(dir) {
+  const refs = stepRefs(modal.wf);
+  const i = refs.findIndex((r) => r.stepIndex === modal.stepIndex && r.supportIndex === modal.supportIndex);
+  const ref = refs[i + dir];
+  if (!ref) return;
+  const step = stepFromModal();
+  if (!step) return;
+  if (!sameStep(step, currentModalStep())) { applyStepModal(step); commit(); }
+  openStepModal(modal.wf, { ...ref, focusField: false });
+  // Keep focus on the arrow so it can be pressed again; at the end of the list it is disabled
+  const btn = dir < 0 ? $("stepPrev") : $("stepNext");
+  (btn.disabled ? (dir < 0 ? $("stepNext") : $("stepPrev")) : btn).focus();
+}
+
+function currentModalStep() {
+  const main = modal.wf.steps[modal.stepIndex];
+  return modal.supportIndex != null ? main.support[modal.supportIndex] : main;
+}
+
+/** Same step data, ignoring the support list a main step carries, key order, and empty
+ *  fields (imported steps hold them as null, the dialog leaves them out). */
+function sameStep(a, b) {
+  const key = (s) => JSON.stringify(Object.keys(s).filter((k) => k !== "support" && s[k] != null).sort().map((k) => [k, s[k]]));
+  return key(a) === key(b);
 }
 
 /** Selectable step types for the currently open dialog (mirrors WMStepDialog:getStepTypes).
@@ -1385,15 +1444,23 @@ function seedTypeLabel(name) {
 }
 
 function saveStepModal() {
-  const wf = modal.wf;
-  if (!wf) return;
+  if (!modal.wf) return;
+  const step = stepFromModal();
+  if (!step) return;
+  applyStepModal(step);
+  $("stepModal").close();
+  commit();
+}
 
+/** The step as the dialog currently describes it, or null when the target is missing
+ *  (the field is focused instead). */
+function stepFromModal() {
   let step;
   if (isMarkerType(modal.type)) {
     step = { type: modal.type, target: "" };
   } else {
     const target = $("stepTarget").value.trim();
-    if (!target) { $("stepTarget").focus(); return; }
+    if (!target) { $("stepTarget").focus(); return null; }
     step = { type: modal.type, action: modal.action, target };
     if (modal.type === STEP_AUTODRIVE) {
       const unload = $("stepUnloadTarget").value.trim();
@@ -1404,10 +1471,15 @@ function saveStepModal() {
         step.seedFruitType = modal.seedFruitType;
       }
     }
-    harvestStepTargets(step);
   }
   if (modalCanFinishBeforeSwitch() && modal.finishBeforeSwitch) step.finishBeforeSwitch = true;
+  return step;
+}
 
+/** Writes `step` into the workflow at the dialog's position. */
+function applyStepModal(step) {
+  const wf = modal.wf;
+  harvestStepTargets(step);
   if (modal.isNewSupport) {
     const main = wf.steps[modal.stepIndex];
     if (!main.support) main.support = [];
@@ -1421,9 +1493,6 @@ function saveStepModal() {
     step.support = wf.steps[modal.stepIndex].support || [];
     wf.steps[modal.stepIndex] = step;
   }
-
-  $("stepModal").close();
-  commit();
 }
 
 /* ---------- combobox (target / unload target) ---------- */
@@ -2067,6 +2136,8 @@ function init() {
 
   // Step modal
   $("stepForm").addEventListener("submit", (e) => { e.preventDefault(); saveStepModal(); });
+  $("stepPrev").addEventListener("click", () => navigateStepModal(-1));
+  $("stepNext").addEventListener("click", () => navigateStepModal(1));
   $("fillSearch").addEventListener("input", renderFillPicker);
   // The fill-type list is shown only while the search field or the list has focus. The list
   // is tabindex=-1 so a click on a row's text keeps focus inside it — otherwise the list

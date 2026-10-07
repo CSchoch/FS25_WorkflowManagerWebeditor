@@ -166,7 +166,15 @@ try {
     <header class="modal-head">
       <div class="sm-title">
         <h3 id="stepModalTitle">Add Step</h3>
-        <span class="sm-num" id="stepModalNum"></span>
+        <div class="sm-pager">
+          <button type="button" class="pager-btn" id="stepPrev" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <span class="sm-num" id="stepModalNum"></span>
+          <button type="button" class="pager-btn" id="stepNext" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
       </div>
       <button type="button" class="icon-btn" data-close="stepModal" aria-label="Close">✕</button>
     </header>

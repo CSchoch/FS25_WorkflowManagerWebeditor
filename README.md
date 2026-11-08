@@ -38,7 +38,8 @@ no game running, no build step, no dependencies. Deployable as a GitHub Page.
   read the AutoDrive destinations from its `AutoDrive_config.xml` and — once the Courseplay
   `Courses` folder is linked under Targets — the courses of its map (`Courses/<mapId>`, from
   `careerSavegame.xml`). AutoDrive names are `group/marker` like in the game's step dialog.
-  Lists are grouped like in-game (AutoDrive group / field folder), filtered as you type, and
+  Lists are grouped like in-game (AutoDrive group / field folder), filtered as you type (the
+  step dialog's suggestions list name matches before folder-only matches, as in-game), and
   can also be maintained by hand or imported from an `AutoDrive_config.xml` / a map's
   course folder. Course files have no extension, so they're recognised by content. Course
   names are kept root-relative (`Singleplayer/F34/Kalken`), which is what the game matches on;

@@ -1549,6 +1549,23 @@ function comboOptions(kind) {
   return kind === "cp" ? state.targets.cp : state.targets.ad;
 }
 
+/**
+ * Filters "folder/name" targets (CP courses, AD group/marker) by a lower-case query. Names whose
+ * own part (after the last "/") matches come first, folder-only matches after; each group keeps
+ * the list order. Same ranking as WMStepDialog:filterPathItems in the game.
+ */
+function filterPathNames(names, q) {
+  if (!q) return names;
+  const nameHits = [];
+  const folderHits = [];
+  for (const n of names) {
+    const lower = n.toLowerCase();
+    if (lower.slice(lower.lastIndexOf("/") + 1).includes(q)) nameHits.push(n);
+    else if (lower.includes(q)) folderHits.push(n);
+  }
+  return nameHits.concat(folderHits);
+}
+
 function setupCombo(inputId, listId, kindFn) {
   const input = $(inputId);
   const list = $(listId);
@@ -1558,7 +1575,7 @@ function setupCombo(inputId, listId, kindFn) {
 
   const open = () => {
     const q = input.value.trim().toLowerCase();
-    const opts = comboOptions(kindFn()).filter((o) => !q || o.toLowerCase().includes(q));
+    const opts = filterPathNames(comboOptions(kindFn()), q);
     list.replaceChildren();
     if (opts.length === 0) {
       list.append(el("div", { class: "opt none" }, t("noMatches")));
